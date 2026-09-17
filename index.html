@@ -1,0 +1,935 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestCompass | Top-Performing Stock Recommendations</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sage: #E8E6DE;
+            --offwhite: #F9F8F4;
+            --charcoal: #1E201D;
+            --terracotta: #e5472d;
+            --color-1: #85df75;
+            --color-2: #fbb53f;
+            --color-3: #ffcf02;
+            --color-4: #50c1ff;
+            --color-5: #f47362;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--sage);
+            color: var(--charcoal);
+            overflow-x: hidden;
+            scroll-behavior: smooth;
+        }
+        .space-mono { font-family: 'Space Mono', monospace; }
+        
+        /* Glassmorphism header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(232, 230, 222, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(30, 32, 29, 0.05);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        header.scrolled {
+            background: rgba(232, 230, 222, 0.95);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
+        }
+        
+        /* Animated gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, var(--charcoal) 0%, var(--charcoal) 50%, rgba(30, 32, 29, 0.5) 100%);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: gradientShift 8s ease infinite;
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        /* Floating animation */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+        }
+        .float { animation: float 6s ease-in-out infinite; }
+        
+        /* Chart animations */
+        .chart-line {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-12px) scale(1.02);
+            box-shadow: 0 40px 80px rgba(0,0,0,0.12);
+        }
+        
+        /* Magnetic button effect */
+        .magnetic-btn {
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .magnetic-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: linear-gradient(45deg, var(--terracotta), var(--charcoal));
+            border-radius: inherit;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: -1;
+        }
+        .magnetic-btn:hover::before { opacity: 0.15; }
+        
+        /* Reveal animations */
+        .reveal { opacity: 0; }
+        
+        /* Smooth scroll snap */
+        .scroll-section {
+            scroll-snap-align: start;
+            scroll-snap-stop: normal;
+        }
+        
+        /* Particle effect */
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: var(--charcoal);
+            border-radius: 50%;
+            opacity: 0.1;
+            animation: particleFloat 20s infinite;
+        }
+        @keyframes particleFloat {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(100px, -100px); }
+            50% { transform: translate(-50px, -200px); }
+            75% { transform: translate(-150px, -100px); }
+        }
+        
+        /* Pulsing glow */
+        .pulse-glow {
+            animation: pulseGlow 3s ease-in-out infinite;
+        }
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 20px rgba(229, 71, 45, 0.2); }
+            50% { box-shadow: 0 0 40px rgba(229, 71, 45, 0.4); }
+        }
+        
+        /* Shimmer effect */
+        .shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+        @keyframes shimmer {
+            100% { left: 100%; }
+        }
+        
+        /* Custom cursor trail */
+        .cursor-trail {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: var(--terracotta);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 9999;
+            transition: transform 0.15s ease-out;
+        }
+        
+        /* Number counter animation */
+        @keyframes countUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .count-up { animation: countUp 0.6s ease-out forwards; }
+    </style>
+</head>
+<body class="text-[#1E201D] bg-[#E8E6DE]">
+    <!-- Header -->
+    <header id="header" class="">
+        <div class="flex h-20 max-w-[1600px] mr-auto ml-auto px-6 md:px-16 items-center justify-between">
+            <div class="cursor-pointer group">
+                <img src="investing%20compass.svg" alt="Investment Compass" class="h-7 md:h-12 w-auto transition-opacity duration-300 group-hover:opacity-80">
+            </div>
+            <nav class="hidden md:flex items-center gap-12">
+                <a href="#" class="uppercase hover:opacity-100 transition-opacity duration-300 text-sm font-bold tracking-wider opacity-70">start</a>
+                <a href="#how" class="text-sm font-bold tracking-wider uppercase opacity-70 hover:opacity-100 transition-opacity duration-300">How it Works</a>
+                <a href="#why" class="uppercase hover:opacity-100 transition-opacity duration-300 text-sm font-bold tracking-wider opacity-70">Why use this</a>
+                <a href="#subscribe" class="uppercase hover:scale-105 transition-transform duration-300 text-sm font-bold text-[#e5472d] tracking-wider">sign up for alerts</a>
+            </nav>
+            <button id="menuBtn" class="md:hidden w-10 h-10 flex items-center justify-center rounded-lg border border-[#1E201D]/15 hover:bg-[#1E201D]/5 transition-colors" aria-label="Open menu">
+                <iconify-icon icon="solar:hamburger-menu-linear" width="24" class="text-[#1E201D]"></iconify-icon>
+            </button>
+        </div>
+        <nav id="mobileMenu" class="md:hidden hidden flex-col gap-2 bg-[#E8E6DE]/95 backdrop-blur-xl border-t border-[#1E201D]/10 px-6 py-6">
+            <a href="#" class="uppercase text-sm font-bold tracking-wider opacity-70 py-2">Start</a>
+            <a href="#how" class="uppercase text-sm font-bold tracking-wider opacity-70 py-2">How it Works</a>
+            <a href="#why" class="uppercase text-sm font-bold tracking-wider opacity-70 py-2">Why use this</a>
+            <a href="#subscribe" class="uppercase text-sm font-bold tracking-wider text-[#e5472d] py-2">Sign up for alerts</a>
+        </nav>
+    </header>
+
+    <main class="pt-20 md:pt-0">
+        <!-- Hero Section -->
+        <section class="scroll-section reveal min-h-screen flex px-6 md:px-16 py-16 md:py-20 overflow-hidden relative items-center">
+  <!-- Animated particles -->
+  <div class="particle" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
+  <div class="particle" style="top: 30%; left: 80%; animation-delay: 2s;"></div>
+  <div class="particle" style="top: 60%; left: 20%; animation-delay: 4s;"></div>
+
+  <div class="max-w-[1600px] mx-auto w-full grid md:grid-cols-2 gap-16 items-center">
+    <div class="space-y-8">
+      <div class="flex items-center gap-3 text-[#e5472d] space-mono text-xs font-bold tracking-widest uppercase">
+        <div class="w-10 h-0.5 bg-[#e5472d]"></div>
+        <span>Monthly Updates</span>
+      </div>
+
+      <h1 class="md:text-7xl leading-[0.95] text-5xl font-black tracking-tight">
+        <span class="gradient-text">Top-Performing Stocks</span><br>
+        <span class="text-[#1E201D] opacity-30">Recommendations</span>
+      </h1>
+
+
+
+      <div class="inline-block relative">
+        <h2 class="z-10 text-base font-black relative">Inviting for those who just getting started.</h2>
+        <div class="absolute bottom-1 left-0 right-0 h-2 bg-[#e5472d] opacity-30 -rotate-1 rounded-sm"></div>
+      </div>
+
+      <h2 class="text-base opacity-60">New to investing? We spotlight the top 5 performing stocks each week so you can
+        track,
+        learn, and invest with confidence.</h2>
+
+      <div class="flex flex-wrap gap-4 pt-4">
+        <a href="#lists" class="magnetic-btn shimmer px-10 py-4 bg-[#85df75] text-[#1E201D] rounded-full font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+          View Latest Picks
+        </a>
+        <a href="#subscribe" class="magnetic-btn px-10 py-4 bg-transparent border-2 border-[#1E201D] text-[#1E201D] rounded-full font-bold text-sm uppercase tracking-wider transition-all duration-300 hover:bg-[#1E201D] hover:text-[#E8E6DE] hover:scale-105">
+          Get Alerts
+        </a>
+      </div>
+    </div>
+
+    <!-- Animated Chart Card -->
+    <div class="relative float" style="animation-delay: 1s;">
+      <div class="overflow-hidden bg-[#F9F8F4] border-[#1E201D]/5 border rounded-3xl p-6 md:p-12 relative shadow-2xl">
+
+        <div id="chartTooltip" class="absolute bg-[#1E201D] text-white px-4 py-2 rounded-lg text-xs space-mono pointer-events-none opacity-0 transition-opacity duration-200 z-20" style="left: 127.5px; top: -38.6986px;">MAY 2024: +1.8%</div>
+
+        <div class="mb-6">
+          <span class="space-mono text-xs text-[#e5472d] font-bold tracking-widest">THEORETICAL GROWTH</span>
+          <h3 class="text-5xl font-black space-mono mt-2 count-up">+19.3%</h3>
+        </div>
+
+        <div class="h-48 w-full mb-6">
+          <svg id="heroChart" viewBox="0 0 500 200" class="w-full h-full overflow-visible cursor-crosshair">
+            <defs>
+              <pattern id="hatchPattern" patternUnits="userSpaceOnUse" width="4" height="4">
+                <path d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" style="stroke:#1E201D; stroke-width:0.5;"></path>
+              </pattern>
+              <linearGradient id="chartGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#1E201D;stop-opacity:1;"></stop>
+                <stop offset="100%" style="stop-color:#1E201D;stop-opacity:0.3;"></stop>
+              </linearGradient>
+            </defs>
+            <path class="hatching" d="M0,180 L50,170 L100,175 L150,150 L200,140 L250,110 L300,105 L350,80 L400,75 L450,40 L500,30 L500,200 L0,200 Z" fill="url(#hatchPattern)"></path>
+            <path class="chart-line" d="M0,180 L50,170 L100,175 L150,150 L200,140 L250,110 L300,105 L350,80 L400,75 L450,40 L500,30" fill="none" stroke="url(#chartGradient)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 0px;"></path>
+            <g class="chart-points">
+              <circle cx="0" cy="180" r="6" fill="#1E201D" opacity="0" data-val="+0.0%" data-date="JAN 2024" class="transition-all duration-300 hover:r-8"></circle>
+              <circle cx="50" cy="170" r="6" fill="#1E201D" opacity="0" data-val="+2.1%" data-date="MAR 2024" class="transition-all duration-300"></circle>
+              <circle cx="100" cy="175" r="6" fill="#1E201D" opacity="0" data-val="+1.8%" data-date="MAY 2024" class="transition-all duration-300"></circle>
+              <circle cx="150" cy="150" r="6" fill="#1E201D" opacity="0" data-val="+5.4%" data-date="JUL 2024" class="transition-all duration-300"></circle>
+              <circle cx="200" cy="140" r="6" fill="#1E201D" opacity="0" data-val="+7.2%" data-date="SEP 2024" class="transition-all duration-300"></circle>
+              <circle cx="250" cy="110" r="6" fill="#1E201D" opacity="0" data-val="+10.8%" data-date="NOV 2024" class="transition-all duration-300"></circle>
+              <circle cx="300" cy="105" r="6" fill="#1E201D" opacity="0" data-val="+11.5%" data-date="JAN 2025" class="transition-all duration-300"></circle>
+              <circle cx="350" cy="80" r="6" fill="#1E201D" opacity="0" data-val="+14.2%" data-date="FEB 2025" class="transition-all duration-300"></circle>
+              <circle cx="400" cy="75" r="6" fill="#1E201D" opacity="0" data-val="+15.1%" data-date="MAR 2025" class="transition-all duration-300"></circle>
+              <circle cx="450" cy="40" r="6" fill="#1E201D" opacity="0" data-val="+18.4%" data-date="APR 2025" class="transition-all duration-300"></circle>
+              <circle cx="500" cy="30" r="6" fill="#1E201D" opacity="0" data-val="+19.3%" data-date="MAY 2025" class="transition-all duration-300"></circle>
+            </g>
+          </svg>
+        </div>
+
+        <div class="flex justify-between space-mono text-xs opacity-50">
+          <span>JAN 2024</span>
+          <span>MAY 2025</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+        <!-- Stock Cards Section -->
+        <section id="lists" class="scroll-section reveal min-h-screen flex items-center px-6 md:px-16 py-32">
+            <div class="max-w-[1600px] mx-auto w-full">
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- AMD Card -->
+                    <div class="card-hover rounded-3xl overflow-hidden shadow-xl" style="background-color:var(--color-2);">
+                        <div class="p-6 md:p-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h4 class="text-3xl font-black mb-1">AMD</h4>
+                                    <p class="text-sm opacity-70">Advanced Micro Devices</p>
+                                </div>
+                                <div class="text-2xl font-bold space-mono">$153.8</div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider">This Months Performance</p>
+                                <p class="text-6xl font-black space-mono leading-none">+12.8%</p>
+                            </div>
+                            
+                            <div class="h-20 mb-4">
+                                <svg viewBox="0 0 200 80" preserveAspectRatio="none" class="w-full h-full">
+                                    <path class="chart-line" d="M0,60 Q50,45 100,50 T200,30" fill="none" stroke="rgba(30,32,29,0.3)" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 0px;"></path>
+                                </svg>
+                            </div>
+                            <p class="text-xs font-bold opacity-60 uppercase tracking-wider">This Years Performance</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 bg-black/5">
+                            <div class="p-8">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">3 Months</p>
+                                <p class="text-2xl font-black space-mono">12.8%</p>
+                            </div>
+                            <div class="p-8 border-l border-black/10">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">6 Months</p>
+                                <p class="text-2xl font-black space-mono">19.3%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AMZN Card -->
+                    <div class="card-hover rounded-3xl overflow-hidden shadow-xl" style="background-color: var(--color-1);">
+                        <div class="p-6 md:p-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div class="">
+                                    <h4 class="text-3xl font-black mb-1">AMZN</h4>
+                                    <p class="text-sm opacity-70">Amazon.com Inc</p>
+                                </div>
+                                <div class="text-2xl font-bold space-mono">$178.2</div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider">This Months Performance</p>
+                                <p class="text-6xl font-black space-mono leading-none">+8.4%</p>
+                            </div>
+                            
+                            <div class="h-20 mb-4">
+                                <svg viewBox="0 0 200 80" preserveAspectRatio="none" class="w-full h-full">
+                                    <path class="chart-line" d="M0,70 Q50,60 100,55 T200,40" fill="none" stroke="rgba(30,32,29,0.3)" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 0px;"></path>
+                                </svg>
+                            </div>
+                            <p class="text-xs font-bold opacity-60 uppercase tracking-wider">This Years Performance</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 bg-black/5">
+                            <div class="p-8">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">3 Months</p>
+                                <p class="text-2xl font-black space-mono">9.2%</p>
+                            </div>
+                            <div class="p-8 border-l border-black/10">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">6 Months</p>
+                                <p class="text-2xl font-black space-mono">14.5%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GLD Card -->
+                    <div class="card-hover rounded-3xl overflow-hidden shadow-xl" style="background-color: var(--color-3);">
+                        <div class="p-6 md:p-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h4 class="text-3xl font-black mb-1">GLD</h4>
+                                    <p class="text-sm opacity-70">SPDR Gold Shares</p>
+                                </div>
+                                <div class="text-2xl font-bold space-mono">$202.5</div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider">This Months Performance</p>
+                                <p class="text-6xl font-black space-mono leading-none">+5.1%</p>
+                            </div>
+                            
+                            <div class="h-20 mb-4">
+                                <svg viewBox="0 0 200 80" preserveAspectRatio="none" class="w-full h-full">
+                                    <path class="chart-line" d="M0,65 Q50,62 100,60 T200,55" fill="none" stroke="rgba(30,32,29,0.3)" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 0px;"></path>
+                                </svg>
+                            </div>
+                            <p class="text-xs font-bold opacity-60 uppercase tracking-wider">This Years Performance</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 bg-black/5">
+                            <div class="p-8">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">3 Months</p>
+                                <p class="text-2xl font-black space-mono">4.8%</p>
+                            </div>
+                            <div class="p-8 border-l border-black/10">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">6 Months</p>
+                                <p class="text-2xl font-black space-mono">7.2%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- NVDA Card -->
+                    <div class="card-hover rounded-3xl overflow-hidden shadow-xl" style="background-color: var(--color-4);">
+                        <div class="p-6 md:p-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h4 class="text-3xl font-black mb-1">NVDA</h4>
+                                    <p class="text-sm opacity-70">NVIDIA Corporation</p>
+                                </div>
+                                <div class="text-2xl font-bold space-mono">$315.4</div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider">This Months Performance</p>
+                                <p class="text-6xl font-black space-mono leading-none">+15.2%</p>
+                            </div>
+                            
+                            <div class="h-20 mb-4">
+                                <svg viewBox="0 0 200 80" preserveAspectRatio="none" class="w-full h-full">
+                                    <path class="chart-line" d="M0,75 Q50,50 100,40 T200,20" fill="none" stroke="rgba(30,32,29,0.3)" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 1000px;"></path>
+                                </svg>
+                            </div>
+                            <p class="text-xs font-bold opacity-60 uppercase tracking-wider">This Years Performance</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 bg-black/5">
+                            <div class="p-8">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">3 Months</p>
+                                <p class="text-2xl font-black space-mono">18.6%</p>
+                            </div>
+                            <div class="p-8 border-l border-black/10">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">6 Months</p>
+                                <p class="text-2xl font-black space-mono">24.1%</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MSFT Card -->
+                    <div class="card-hover rounded-3xl overflow-hidden shadow-xl" style="background-color: var(--color-5);">
+                        <div class="p-6 md:p-10">
+                            <div class="flex justify-between items-start mb-6">
+                                <div>
+                                    <h4 class="text-3xl font-black mb-1">MSFT</h4>
+                                    <p class="text-sm opacity-70">Microsoft Corporation</p>
+                                </div>
+                                <div class="text-2xl font-bold space-mono">$412.8</div>
+                            </div>
+                            
+                            <div class="mb-6">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider">This Months Performance</p>
+                                <p class="text-6xl font-black space-mono leading-none">+6.9%</p>
+                            </div>
+                            
+                            <div class="h-20 mb-4">
+                                <svg viewBox="0 0 200 80" preserveAspectRatio="none" class="w-full h-full">
+                                    <path class="chart-line" d="M0,68 Q50,58 100,52 T200,45" fill="none" stroke="rgba(30,32,29,0.3)" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 1000px;"></path>
+                                </svg>
+                            </div>
+                            <p class="text-xs font-bold opacity-60 uppercase tracking-wider">This Years Performance</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 bg-black/5">
+                            <div class="p-8">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">3 Months</p>
+                                <p class="text-2xl font-black space-mono">8.3%</p>
+                            </div>
+                            <div class="p-8 border-l border-black/10">
+                                <p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">6 Months</p>
+                                <p class="text-2xl font-black space-mono">11.7%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it Works Section -->
+        <section id="how" class="scroll-section reveal min-h-screen flex flex-col justify-center px-6 md:px-16 py-32">
+            <div class="max-w-[1600px] mx-auto w-full">
+                <h2 class="text-5xl sm:text-6xl md:text-8xl font-black mb-16 tracking-tight">How it works.</h2>
+                <p class="text-lg md:text-xl opacity-60 mb-16">Transparency at every step. Click to explore our process.</p>
+                
+                <div class="grid md:grid-cols-[1fr_1.5fr] gap-10 md:gap-16">
+                    <div class="space-y-6">
+                        <div class="methodology-card active bg-[#F9F8F4] rounded-3xl p-6 md:p-10 cursor-pointer transition-all duration-500 border border-[#1E201D]/5 hover:shadow-2xl" data-preview="preview1">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-2xl md:text-3xl font-black">Check our top picks</h3>
+                                <div class="text-4xl text-[#e5472d] transition-transform duration-300">→</div>
+                            </div>
+                            <p class="text-lg opacity-70 mb-4">See best assets we are recommending for this month</p>
+                            <div class="method-body max-h-0 overflow-hidden transition-all duration-500">
+                                <p class="pt-6 border-t border-[#1E201D]/10 opacity-90 leading-relaxed">These picks are generated using a repeatable process that looks at momentum, trend strength, and basic risk filters. This is not a promise of future performance. It's a way to narrow the field.</p>
+                            </div>
+                        </div>
+
+                        <div class="methodology-card bg-[#F9F8F4] rounded-3xl p-6 md:p-10 cursor-pointer transition-all duration-500 border border-[#1E201D]/5 hover:shadow-2xl" data-preview="preview2">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-2xl md:text-3xl font-black">Buy equal parts</h3>
+                                <div class="text-4xl text-[#e5472d] transition-transform duration-300">→</div>
+                            </div>
+                            <p class="text-lg opacity-70 mb-4">Simple risk control by splitting equally</p>
+                            <div class="method-body max-h-0 overflow-hidden transition-all duration-500">
+                                <p class="pt-6 border-t border-[#1E201D]/10 opacity-90 leading-relaxed">Buying equal parts means no single stock dominates your outcome. This is a simple form of risk control often used by beginners: no guessing which pick is 'best' and no over-concentration.</p>
+                            </div>
+                        </div>
+
+                        <div class="methodology-card bg-[#F9F8F4] rounded-3xl p-6 md:p-10 cursor-pointer transition-all duration-500 border border-[#1E201D]/5 hover:shadow-2xl" data-preview="preview3">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-2xl md:text-3xl font-black">See Past Performance</h3>
+                                <div class="text-4xl text-[#e5472d] transition-transform duration-300">→</div>
+                            </div>
+                            <p class="text-lg opacity-70 mb-4">Real track record, real talk</p>
+                            <div class="method-body max-h-0 overflow-hidden transition-all duration-500">
+                                <p class="pt-6 border-t border-[#1E201D]/10 opacity-90 leading-relaxed">We show short-term swings + multi-month trends so you see how bumpy (volatile) each asset really gets. Every asset behaves differently—some zoom up fast, others drop hard. Past moves give context, not promises.</p>
+                            </div>
+                        </div>
+
+                        <div class="methodology-card bg-[#F9F8F4] rounded-3xl p-6 md:p-10 cursor-pointer transition-all duration-500 border border-[#1E201D]/5 hover:shadow-2xl" data-preview="preview4">
+                            <div class="flex justify-between items-center mb-2">
+                                <h3 class="text-2xl md:text-3xl font-black">Stay Updated</h3>
+                                <div class="text-4xl text-[#e5472d] transition-transform duration-300">→</div>
+                            </div>
+                            <p class="text-lg opacity-70 mb-4">Get the latest signals directly to your inbox</p>
+                            <div class="method-body max-h-0 overflow-hidden transition-all duration-500">
+                                <p class="pt-6 border-t border-[#1E201D]/10 opacity-90 leading-relaxed">Make sure you sign up to receive email alerts. Keep an eye out for our monthly updates! We send out a comprehensive digest of our top performing stock recommendations every month.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-[#F9F8F4] rounded-3xl shadow-2xl min-h-[600px] relative overflow-hidden">
+                        <div class="preview-content flex items-center justify-center h-full p-8 opacity-100" id="preview1">
+                            <div class="bg-[#fbb53f] rounded-2xl p-8 w-full max-w-sm shadow-xl shimmer">
+                                <div class="flex justify-between mb-6">
+                                    <div>
+                                        <h5 class="text-2xl font-black">AMZN</h5>
+                                        <p class="text-sm opacity-70">AMAZON.COM</p>
+                                    </div>
+                                    <div class="space-mono font-bold">$178.2</div>
+                                </div>
+                                <div class="text-5xl font-black space-mono mb-6">+12.8%</div>
+                                <div class="h-16">
+                                    <svg viewBox="0 0 200 60" class="w-full h-full">
+                                        <path class="chart-line" d="M0,50 Q50,40 100,35 T200,10" fill="none" stroke="#1E201D" stroke-width="3" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 1000px;"></path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-content hidden items-center justify-center h-full p-8 opacity-0" id="preview2">
+                            <div>
+                                <div class="w-60 h-60 relative">
+                                    <svg viewBox="0 0 100 100" class="transform -rotate-90">
+                                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#1E201D" stroke-width="15" stroke-dasharray="50.26 251.3"></circle>
+                                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#85df75" stroke-width="15" stroke-dasharray="50.26 251.3" stroke-dashoffset="-50.26"></circle>
+                                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#fbb53f" stroke-width="15" stroke-dasharray="50.26 251.3" stroke-dashoffset="-100.52"></circle>
+                                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#50c1ff" stroke-width="15" stroke-dasharray="50.26 251.3" stroke-dashoffset="-150.78"></circle>
+                                        <circle cx="50" cy="50" r="40" fill="transparent" stroke="#f47362" stroke-width="15" stroke-dasharray="50.26 251.3" stroke-dashoffset="-201.04"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center text-2xl font-black space-mono">20%</div>
+                                </div>
+                                <p class="text-center mt-8 font-bold opacity-60 space-mono">5 Picks, Equal Weighting</p>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-content hidden items-center justify-center h-full p-8 opacity-0" id="preview3">
+                            <div class="bg-[#1E201D] text-white rounded-2xl p-8 w-full max-w-md">
+                                <div class="flex justify-between items-center mb-8">
+                                    <span class="text-xs font-bold tracking-widest">PAST 6 MONTHS</span>
+                                    <span class="space-mono text-2xl font-black text-[#85df75]">+24.5%</span>
+                                </div>
+                                <div class="h-32 mb-4">
+                                    <svg viewBox="0 0 300 120" class="w-full h-full">
+                                        <path class="chart-line" d="M0,100 L50,90 L100,95 L150,70 L200,60 L250,40 L300,20" fill="none" stroke="#85df75" stroke-width="4" stroke-linecap="round" style="stroke-dasharray: 1000px; stroke-dashoffset: 0px;"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex justify-between text-xs opacity-50 space-mono">
+                                    <span>JAN</span><span>JUN</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-content hidden items-center justify-center h-full p-8 opacity-0" id="preview4">
+                            <div class="bg-white rounded-2xl p-8 w-full max-w-xs shadow-xl">
+                                <div class="text-center mb-6">
+                                    <p class="text-xs text-[#e5472d] font-bold tracking-widest mb-2">NEXT UPDATE</p>
+                                    <p class="text-3xl font-black">May 01</p>
+                                </div>
+                                <div class="grid grid-cols-7 gap-2">
+                                    <div class="text-xs font-bold text-center opacity-50">S</div>
+                                    <div class="text-xs font-bold text-center opacity-50">M</div>
+                                    <div class="text-xs font-bold text-center opacity-50">T</div>
+                                    <div class="text-xs font-bold text-center opacity-50">W</div>
+                                    <div class="text-xs font-bold text-center opacity-50">T</div>
+                                    <div class="text-xs font-bold text-center opacity-50">F</div>
+                                    <div class="text-xs font-bold text-center opacity-50">S</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg bg-[#1E201D] text-white font-bold">1</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100">2</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100">3</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100">4</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100">5</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100">6</div>
+                                    <div class="aspect-square flex items-center justify-center text-sm rounded-lg cursor-pointer hover:bg-gray-100">7</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="absolute bottom-8 right-8 bg-[#1E201D] text-white px-6 py-3 rounded-full text-xs font-bold tracking-widest pulse-glow">
+                            LIVE PREVIEW
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Why Section -->
+        <section id="why" class="scroll-section reveal min-h-screen flex flex-col justify-center px-6 md:px-16 py-32">
+            <div class="max-w-5xl mx-auto">
+                <h2 class="text-4xl sm:text-6xl md:text-7xl font-black mb-24 text-center tracking-tight">Why use it?</h2>
+                
+                <div class="space-y-16 md:space-y-24">
+                    <div class="border-l-2 border-[#1E201D]/10 pl-6 md:pl-8">
+                        <h3 class="text-2xl md:text-4xl font-black mb-6">What this actually is</h3>
+                        <p class="text-lg md:text-2xl leading-relaxed opacity-70">A short list of long-term market picks. Built using past performance and simple rules. Free to follow. No ads. No sponsors.</p>
+                    </div>
+
+                    <div class="border-l-2 border-[#1E201D]/10 pl-6 md:pl-8">
+                        <h3 class="text-2xl md:text-4xl font-black mb-6">Why it exists</h3>
+                        <p class="text-lg md:text-2xl leading-relaxed opacity-70 mb-4">Most market content is built for clicks. This isn't.</p>
+                        <p class="text-lg md:text-2xl leading-relaxed opacity-70">This list is built to answer one question: "What still makes sense to hold?"</p>
+                    </div>
+
+                    <div class="border-l-2 border-[#1E201D]/10 pl-6 md:pl-8">
+                        <h3 class="text-2xl md:text-4xl font-black mb-6">How the picks are chosen</h3>
+                        <p class="text-lg md:text-2xl leading-relaxed opacity-70 mb-4">Instead of hype or predictions:</p>
+                        <p class="text-lg md:text-2xl leading-relaxed opacity-70">We look at how similar assets behaved in the past. We avoid short-term trades. We remove anything that no longer fits the rules. Nothing is added just because it's trending.</p>
+                    </div>
+
+                    <div class="border-l-2 border-[#1E201D]/10 pl-6 md:pl-8">
+                        <h3 class="text-2xl md:text-4xl font-black mb-6">Is this legit?</h3>
+                        <p class="text-lg md:text-2xl leading-relaxed opacity-70">Yes — but it's simple. This is not financial advice. There are no paid placements. Every pick can be traced back to public market data. If the data changes, the list changes.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA Section -->
+        <section id="subscribe" class="scroll-section reveal min-h-screen flex items-center px-6 md:px-16 py-32">
+            <div class="max-w-6xl mx-auto w-full bg-[#e5472d] rounded-[2rem] md:rounded-[4rem] p-8 md:p-20 text-center relative overflow-hidden shadow-2xl">
+                <div class="absolute inset-0 opacity-10">
+                    <div class="absolute top-10 left-10 w-32 h-32 bg-white rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-10 right-10 w-40 h-40 bg-white rounded-full blur-3xl"></div>
+                </div>
+                
+                <div class="relative z-10">
+                    <div class="w-16 h-16 md:w-20 md:h-20 bg-white rounded-2xl flex items-center justify-center mx-auto mb-8 md:mb-12 shimmer">
+                        <iconify-icon icon="solar:letter-linear" width="40" class="text-[#e5472d]"></iconify-icon>
+                    </div>
+                    
+                    <h2 class="text-4xl md:text-7xl font-black text-[#F9F8F4] mb-8 tracking-tight">Get the next list</h2>
+                    <p class="text-xl md:text-3xl text-[#F9F8F4] mb-4 opacity-90">We'll email you when the list updates.</p>
+                    <p class="text-base text-[#F9F8F4] opacity-60 space-mono mb-10 md:mb-16">No daily emails. No spam.</p>
+                    
+                    <form class="max-w-2xl mx-auto" onsubmit="event.preventDefault(); alert('Thank you for subscribing!');">
+                        <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center bg-white/20 backdrop-blur-xl p-3 rounded-3xl md:rounded-full border border-white/10">
+                            <input type="email" class="flex-1 bg-transparent border-none text-white text-lg md:text-xl px-6 md:px-8 py-4 outline-none placeholder-white/40 text-center md:text-left" placeholder="your@email.com" required="">
+                            <button type="submit" class="magnetic-btn bg-[#F9F8F4] text-[#1E201D] px-12 py-4 rounded-full font-black text-lg uppercase tracking-wider transition-all duration-300 hover:scale-105 hover:shadow-2xl shimmer">
+                                Join
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="max-w-[1600px] mx-auto px-6 md:px-16 py-12 text-center border-t border-[#1E201D]/10">
+        <img src="investing%20compass.svg" alt="Investment Compass" class="h-8 md:h-10 w-auto mx-auto mb-6">
+        <p class="mb-4">© 2025 Investment Compass. All rights reserved.</p>
+        <div class="flex justify-center gap-8">
+            <a href="#" class="opacity-50 hover:opacity-100 transition-opacity">Privacy Policy</a>
+            <a href="#" class="opacity-50 hover:opacity-100 transition-opacity">Terms of Service</a>
+        </div>
+    </footer>
+
+    <script>
+        gsap.registerPlugin(ScrollTrigger);
+
+        // Header scroll effect
+        const header = document.getElementById('header');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('menuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        if (menuBtn && mobileMenu) {
+            menuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                menuBtn.querySelector('iconify-icon').setAttribute('icon',
+                    mobileMenu.classList.contains('hidden') ? 'solar:hamburger-menu-linear' : 'solar:close-circle-bold');
+            });
+            mobileMenu.querySelectorAll('a').forEach(a => {
+                a.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                    menuBtn.querySelector('iconify-icon').setAttribute('icon', 'solar:hamburger-menu-linear');
+                });
+            });
+        }
+
+        // Reveal animations with stagger
+        gsap.utils.toArray('.reveal').forEach(el => {
+            gsap.fromTo(el,
+                { y: 60, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.6,
+                    ease: 'power4.out',
+                    scrollTrigger: {
+                        trigger: el,
+                        start: 'top 80%',
+                        toggleActions: 'play none none reverse'
+                    }
+                }
+            );
+        });
+
+        // Chart line animations
+        gsap.utils.toArray('.chart-line').forEach(line => {
+            gsap.set(line, { strokeDashoffset: 1000, strokeDasharray: 1000 });
+            gsap.to(line, {
+                strokeDashoffset: 0,
+                duration: 1.2,
+                ease: 'power2.inOut',
+                scrollTrigger: {
+                    trigger: line,
+                    start: 'top 85%',
+                    toggleActions: 'play none none none'
+                }
+            });
+        });
+
+        // Hero chart interaction
+        const heroChart = document.getElementById('heroChart');
+        const tooltip = document.getElementById('chartTooltip');
+        const displayVal = document.querySelector('.count-up');
+        const points = document.querySelectorAll('.chart-points circle');
+
+        if (heroChart) {
+            heroChart.addEventListener('mousemove', (e) => {
+                const rect = heroChart.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const svgWidth = rect.width;
+                const dataX = (x / svgWidth) * 500;
+
+                let closestPoint = points[0];
+                let minDiff = Math.abs(dataX - points[0].getAttribute('cx'));
+
+                points.forEach(p => {
+                    const diff = Math.abs(dataX - p.getAttribute('cx'));
+                    if (diff < minDiff) {
+                        minDiff = diff;
+                        closestPoint = p;
+                    }
+                });
+
+                tooltip.style.opacity = '1';
+                tooltip.style.left = (e.clientX - rect.left + 20) + 'px';
+                tooltip.style.top = (e.clientY - rect.top - 40) + 'px';
+                tooltip.innerText = `${closestPoint.dataset.date}: ${closestPoint.dataset.val}`;
+                displayVal.innerText = closestPoint.dataset.val;
+
+                points.forEach(p => p.style.opacity = '0.2');
+                closestPoint.style.opacity = '1';
+                closestPoint.setAttribute('r', '8');
+            });
+
+            heroChart.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+                displayVal.innerText = '+19.3%';
+                points.forEach(p => {
+                    p.style.opacity = '0';
+                    p.setAttribute('r', '6');
+                });
+            });
+        }
+
+        // Methodology card switching with smooth transitions
+        const methodologyCards = document.querySelectorAll('.methodology-card');
+        const previews = document.querySelectorAll('.preview-content');
+
+        methodologyCards.forEach(card => {
+            card.addEventListener('click', () => {
+                const targetId = card.dataset.preview;
+                const targetPreview = document.getElementById(targetId);
+
+                if (card.classList.contains('active')) return;
+
+                // Update cards
+                methodologyCards.forEach(c => {
+                    c.classList.remove('active');
+                    c.style.background = '#F9F8F4';
+                    c.style.color = '#1E201D';
+                    const body = c.querySelector('.method-body');
+                    body.style.maxHeight = '0';
+                });
+                
+                card.classList.add('active');
+                card.style.background = '#1E201D';
+                card.style.color = 'white';
+                const activeBody = card.querySelector('.method-body');
+                activeBody.style.maxHeight = '500px';
+
+                // Cross-fade previews
+                previews.forEach(p => {
+                    if (!p.classList.contains('hidden')) {
+                        gsap.to(p, {
+                            opacity: 0,
+                            scale: 0.95,
+                            duration: 0.25,
+                            ease: 'power2.in',
+                            onComplete: () => {
+                                p.classList.add('hidden');
+                                p.classList.remove('flex');
+                            }
+                        });
+                    }
+                });
+
+                setTimeout(() => {
+                    targetPreview.classList.remove('hidden');
+                    targetPreview.classList.add('flex');
+                    gsap.fromTo(targetPreview,
+                        { opacity: 0, scale: 0.95 },
+                        {
+                            opacity: 1,
+                            scale: 1,
+                            duration: 0.35,
+                            ease: 'power2.out',
+                            onStart: () => {
+                                const line = targetPreview.querySelector('.chart-line');
+                                if (line) {
+                                    gsap.set(line, { strokeDashoffset: 1000 });
+                                    gsap.to(line, { strokeDashoffset: 0, duration: 1, ease: 'power2.inOut' });
+                                }
+                            }
+                        }
+                    );
+                }, 250);
+            });
+        });
+
+        // Magnetic button effect
+        document.querySelectorAll('.magnetic-btn').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const rect = btn.getBoundingClientRect();
+                const x = e.clientX - rect.left - rect.width / 2;
+                const y = e.clientY - rect.top - rect.height / 2;
+                
+                gsap.to(btn, {
+                    x: x * 0.3,
+                    y: y * 0.3,
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+            
+            btn.addEventListener('mouseleave', () => {
+                gsap.to(btn, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.5,
+                    ease: 'elastic.out(1, 0.3)'
+                });
+            });
+        });
+
+        // Parallax effect on scroll
+        gsap.to('.float', {
+            y: -50,
+            scrollTrigger: {
+                trigger: '.float',
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: 1
+            }
+        });
+
+        // Number counter animation on scroll
+        const observerOptions = {
+            threshold: 0.5,
+            rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('count-up');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.count-up').forEach(el => observer.observe(el));
+
+        // Card stagger animation
+        gsap.utils.toArray('.card-hover').forEach((card, i) => {
+            gsap.fromTo(card,
+                { y: 40, opacity: 0 },
+                {
+                    y: 0,
+                    opacity: 1,
+                    duration: 0.5,
+                    delay: i * 0.06,
+                    ease: 'power3.out',
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 85%',
+                        toggleActions: 'play none none reverse'
+                    }
+                }
+            );
+        });
+    </script>
+
+</body></html>
