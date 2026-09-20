@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InvestCompass â€” This Month's ETF, Chosen by the Numbers</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&family=Geist:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sage:#E8E6DE; --offwhite:#F9F8F4; --charcoal:#1E201D; --charcoal-soft:#6E7068;
+    --terracotta:#e5472d; --terracotta-dim:#f3ded9; --text-pos:#3f9e56; --text-neg:#e5472d;
+    --curve:#2f9e6e; --curve-dim:#dfeee2;
+    --c-spy:#fbb53f; --c-scz:#85df75; --c-tlt:#50c1ff; --c-spy-text:#b07d00; --c-scz-text:#2f7a35; --c-tlt-text:#1476b3;
+    --border:rgba(30,32,29,0.10); --border-soft:rgba(30,32,29,0.06);
+    --shadow: 0 1px 2px rgba(30,32,29,.04), 0 12px 40px rgba(30,32,29,.07);
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{ scroll-behavior:smooth; scroll-padding-top:110px; height:100%; }
+  body{
+    background:var(--sage); color:var(--charcoal); min-height:100%;
+    font-family:'Geist','Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  .heading{ font-family:'Albert Sans','Helvetica Neue',Arial,sans-serif; letter-spacing:-0.025em; }
+  .mono{ font-family:'Space Mono','Courier New',monospace; }
+  .gradient-text{
+    background:linear-gradient(100deg, var(--charcoal) 30%, var(--terracotta) 90%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .tag{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    padding:6px 12px; border-radius:999px; background:var(--offwhite); border:1px solid var(--border);
+    color:var(--charcoal-soft);
+  }
+  .pulse-dot{ width:6px; height:6px; border-radius:999px; background:var(--terracotta); animation:pulse-glow 1.8s ease-in-out infinite; }
+  @keyframes pulse-glow{ 0%,100%{opacity:1; box-shadow:0 0 0 0 rgba(229,71,45,.5);} 50%{opacity:.55; box-shadow:0 0 0 4px rgba(229,71,45,0);} }
+  .card{ background:var(--offwhite); border:1px solid var(--border); border-radius:24px; box-shadow:var(--shadow); }
+  .btn-primary{
+    display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:15px;
+    background:var(--charcoal); color:var(--sage); padding:14px 24px; border-radius:999px;
+    transition:transform .2s ease, opacity .2s ease;
+  }
+  .btn-primary:hover{ transform:translateY(-2px); opacity:.92; }
+  .btn-outline{
+    display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:15px;
+    background:transparent; color:var(--charcoal); padding:13px 23px; border-radius:999px; border:1.5px solid var(--border);
+    transition:transform .2s ease, border-color .2s ease;
+  }
+  .btn-outline:hover{ transform:translateY(-2px); border-color:var(--charcoal); }
+  .blob{ position:absolute; border-radius:999px; filter:blur(60px); opacity:.35; pointer-events:none; }
+  .nav-link{ font-size:14px; font-weight:600; color:var(--charcoal-soft); transition:color .15s ease; }
+  .nav-link:hover{ color:var(--charcoal); }
+  .step-item{ cursor:pointer; padding:18px 20px; border-radius:16px; border:1px solid transparent; transition:all .25s ease; }
+  .step-item.active{ background:var(--offwhite); border-color:var(--border); box-shadow:var(--shadow); }
+  .step-num{
+    width:30px; height:30px; border-radius:999px; display:flex; align-items:center; justify-content:center;
+    font-size:13px; font-weight:700; background:var(--sage); color:var(--charcoal-soft); flex-shrink:0;
+    font-family:'Space Mono',monospace; transition:all .25s ease;
+  }
+  .step-item.active .step-num{ background:var(--terracotta); color:#fff; }
+  .accordion-btn{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; text-align:left; padding:22px 4px; }
+  .accordion-panel{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
+  .accordion-item.open .accordion-panel{ max-height:400px; }
+  .accordion-item.open .accordion-plus{ transform:rotate(45deg); }
+  .accordion-plus{ transition:transform .25s ease; flex-shrink:0; }
+  input[type="text"], input[type="number"], input[type="email"]{
+    font-family:inherit; background:var(--sage); border:1.5px solid var(--border); border-radius:14px;
+    padding:12px 16px; color:var(--charcoal); outline:none; transition:border-color .15s ease;
+  }
+  input:focus{ border-color:var(--terracotta); }
+  .reveal{ opacity:0; transform:translateY(24px); }
+  ::selection{ background:var(--terracotta); color:#fff; }
+  .wallet-seg{ transition:width .3s ease; }
+  @media (max-width:640px){ .heading.text-6xl{ font-size:2.5rem; } }
+</style>
+<style>
+  /* ============ v1.8 friendly design layer (v1.6 language, white/light only) ============ */
+  body{ background:var(--sage); }
+  .heading{ letter-spacing:-0.04em; line-height:1.1; }
+
+  /* animated gradient headline */
+  .gradient-text{
+    background:linear-gradient(135deg, var(--charcoal) 0%, #f47362 55%, #fbb53f 100%);
+    background-size:200% 200%;
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    animation:gradientShift 10s ease infinite;
+  }
+  @keyframes gradientShift{ 0%,100%{ background-position:0% 50%; } 50%{ background-position:100% 50%; } }
+
+  /* soft page blobs */
+  .blob{ filter:blur(90px); opacity:.55; }
+  .blob.is-terracotta{ background:#e5472d; opacity:.16; }
+  .blob.is-mint{ background:#85df75; opacity:.32; }
+  .blob.is-sky{ background:#50c1ff; opacity:.22; }
+  .blob.is-sun{ background:#fbb53f; opacity:.32; }
+
+  /* solid friendly tag pill (terracotta) */
+  .tag{
+    display:inline-flex; align-items:center; gap:.4rem;
+    padding:.42rem 1rem; border-radius:9999px;
+    background:var(--terracotta); color:#fff;
+    font-size:.72rem; font-weight:600; letter-spacing:.06em; text-transform:uppercase;
+    border:none; box-shadow:0 4px 12px rgba(229,71,45,.22);
+  }
+
+  /* big pill buttons (1.6) */
+  .btn-primary, .btn-outline{ height:50px; font-size:1rem; }
+  .btn-primary{ background:var(--charcoal); color:#fff; padding:0 1.7rem; border-radius:9999px; box-shadow:0 8px 24px rgba(30,32,29,.18); }
+  .btn-primary:hover{ transform:translateY(-2px); background:#2c2f2b; opacity:1; box-shadow:0 12px 28px rgba(30,32,29,.24); }
+  .btn-outline{ background:transparent; color:var(--charcoal); padding:0 1.7rem; border-radius:9999px; border:1.5px solid rgba(30,32,29,.35); }
+  .btn-outline:hover{ transform:translateY(-2px); background:var(--charcoal); color:#fff; border-color:var(--charcoal); }
+
+  /* soft rounded friendly cards */
+  .card{ background:var(--offwhite); border:1px solid var(--border); border-radius:26px; box-shadow:0 4px 18px rgba(30,32,29,.05), 0 14px 44px rgba(30,32,29,.06); }
+
+  /* step pills â†’ 1.6 soft pills */
+  .step-item{ padding:.9rem 1.1rem; border-radius:9999px; border:1px solid rgba(30,32,29,.13); background:rgba(249,248,244,.85); opacity:.55; transform:scale(.985); transition:opacity .35s ease, transform .35s ease, background .35s ease, box-shadow .35s ease; }
+  .step-item:hover{ opacity:.85; }
+  .step-item.active{ opacity:1; transform:scale(1); background:var(--charcoal); border-color:var(--charcoal); color:#fff; box-shadow:0 0 0 4px rgba(229,71,45,.18); }
+  .step-item.active .text-xs{ color:#fff !important; opacity:.65; }
+  .step-num{ width:32px; height:32px; border-radius:9999px; border:1px solid rgba(30,32,29,.3); background:transparent; color:inherit; font-size:.85rem; }
+  .step-item.active .step-num{ background:var(--charcoal); border-color:rgba(255,255,255,.35); color:var(--c-scz); }
+
+  /* FAQ â†’ 1.6 accordion blocks */
+  .accordion-item{ background:rgba(255,255,255,.55); border:1px solid var(--border-soft); border-radius:22px; padding:0 1.6rem; margin-bottom:1rem; box-shadow:none; transition:box-shadow .5s ease, border-color .5s ease; }
+  .accordion-item:hover{ box-shadow:5px 8px 18px rgba(0,0,0,.08); }
+  .accordion-btn{ padding:1.35rem 0; }
+  .accordion-panel{ transition:max-height .5s cubic-bezier(.4,0,.2,1); }
+  .accordion-item.open .accordion-panel{ max-height:600px; }
+  .accordion-plus{ color:var(--terracotta); background:var(--terracotta-dim); width:30px; height:30px; border-radius:9999px; display:flex; align-items:center; justify-content:center; font-size:1.15rem; line-height:1; }
+
+  /* colored tag variants (1.6) */
+  .tag.green{ background:#85df75; color:#1E201D; box-shadow:0 4px 12px rgba(133,223,117,.35); }
+  .tag.yellow{ background:#ffcf02; color:#1E201D; box-shadow:0 4px 12px rgba(255,207,2,.3); }
+  .tag.blue{ background:#50c1ff; color:#1E201D; box-shadow:0 4px 12px rgba(80,193,255,.35); }
+  .tag.coral{ background:#f47362; color:#1E201D; box-shadow:0 4px 12px rgba(244,115,98,.3); }
+
+  /* ETF tooltip on '*' â€” plain language bubble */
+  .etf-tip{ position:relative; cursor:help; }
+  .etf-tip sup{ color:var(--terracotta); -webkit-text-fill-color:var(--terracotta); font-weight:700; font-size:.55em; }
+  .etf-tip .etf-bubble{
+    visibility:hidden; opacity:0; transition:opacity .2s ease, transform .2s ease;
+    position:absolute; bottom:130%; left:50%; transform:translateX(-50%) translateY(6px);
+    background:var(--charcoal); color:#fff; font-size:13px; font-family:'Geist',sans-serif;
+    letter-spacing:0; text-transform:none; font-weight:500; white-space:normal;
+    padding:12px 16px; border-radius:12px; width:max-content; max-width:280px; line-height:1.5;
+    z-index:50; box-shadow:0 10px 28px rgba(30,32,29,.22);
+  }
+  .etf-tip .etf-bubble::after{ content:''; position:absolute; top:100%; left:50%; transform:translateX(-50%); border:6px solid transparent; border-top-color:var(--charcoal); }
+  .etf-tip:hover .etf-bubble{ visibility:visible; opacity:1; transform:translateX(-50%) translateY(0); }
+
+  /* floating next-update card (1.6) */
+  .update-badge{ position:absolute; bottom:-1.5rem; right:-1rem; z-index:20; width:200px; background:rgba(255,255,255,.85); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); border:1px solid rgba(30,32,29,.06); border-radius:1rem; padding:1rem; box-shadow:0 18px 44px rgba(30,32,29,.14); transform:rotate(-3deg); }
+  .update-badge .icon-tile{ width:2.25rem; height:2.25rem; border-radius:.65rem; display:flex; align-items:center; justify-content:center; background:var(--charcoal); color:#85df75; }
+  .update-badge .countdown{ color:var(--terracotta); }
+
+  /* chart system line = green (was terracotta) */
+  #heroChart path:nth-of-type(3), #bigChart path:nth-of-type(3){ stroke:var(--curve); }
+
+  /* floating pill navbar */
+  #navInner{ width:calc(100% - 1.5rem); margin:1rem auto 0; height:64px !important; background:rgba(249,248,244,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1px solid rgba(30,32,29,.08); border-radius:1.25rem; box-shadow:0 12px 40px rgba(30,32,29,.08); }
+  @supports not (backdrop-filter: blur(12px)){ #navInner{ background:#F9F8F4; } }
+  .nav-link{ color:rgba(30,32,29,.62); font-weight:600; }
+
+  /* soft pulse + utilities */
+  .pulse-dot{ box-shadow:0 0 0 0 rgba(229,71,45,.5); }
+  @keyframes pulse-glow{ 0%,100%{ opacity:1; box-shadow:0 0 0 0 rgba(229,71,45,.5); } 50%{ opacity:.55; box-shadow:0 0 0 5px rgba(229,71,45,0); } }
+  @keyframes dotblink{ 50%{ opacity:.15; } }
+  .dot-blink{ display:inline-block; width:.5em; height:.5em; border-radius:999px; background:var(--terracotta); margin-right:.4rem; animation:dotblink 1.2s ease-in-out infinite; }
+  @keyframes floatAnim{ 0%,100%{ transform:translateY(0) rotate(.5deg); } 50%{ transform:translateY(-12px) rotate(.5deg); } }
+  .float{ animation:floatAnim 6s ease-in-out infinite; }
+  @keyframes shimmerSweep{ 100%{ left:100%; } }
+  .shimmer{ position:relative; overflow:hidden; }
+  .shimmer::after{ content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background:linear-gradient(90deg, transparent, rgba(255,255,255,.32), transparent); animation:shimmerSweep 3s ease-in-out infinite; }
+
+  @media (max-width:640px){ h1.heading.text-5xl{ font-size:2.55rem; line-height:1.12; } }
+
+  /* ============ v1.10 big-scale design layer ============ */
+  .heading{ font-weight:800; }
+  h1,h2,h3,h4{ letter-spacing:-0.035em; }
+  .num{ font-variant-numeric: tabular-nums; }
+  :root{
+    --c-spy-soft:#FBEBC8;
+    --c-scz-soft:#E2F3DB;
+    --c-tlt-soft:#DBEFFF;
+  }
+
+  /* juicy, bigger cards */
+  .card{
+    border-radius:28px;
+    box-shadow:0 2px 8px rgba(30,32,29,.05), 0 18px 48px rgba(30,32,29,.09);
+  }
+
+  /* 1.6-style colorful pick card: lift + mouse-follow glow on hover */
+  .card-hover{
+    position:relative; overflow:hidden;
+    transition:transform .5s cubic-bezier(.22,1,.36,1), box-shadow .5s cubic-bezier(.22,1,.36,1);
+  }
+  @media (hover:hover){
+    .card-hover:hover{ transform:translateY(-6px) scale(1.012); box-shadow:0 30px 60px rgba(30,32,29,.18); }
+  }
+  .card-hover::before{
+    content:''; position:absolute; inset:0; z-index:1; pointer-events:none;
+    background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%), rgba(255,255,255,.55) 0%, transparent 62%);
+    opacity:0; transition:opacity .45s ease;
+  }
+  @media (hover:hover){ .card-hover:hover::before{ opacity:1; } }
+  .card-hover > *{ position:relative; z-index:2; }
+
+  /* step pills bigger (1.4 how-it-works proportions) */
+  .step-item{ padding:1.1rem 1.3rem; border-radius:1.2rem; }
+  .step-item .text-xs{ font-size:.85rem; }
+  .step-item .text-sm{ font-size:1.05rem; }
+  .step-num{ width:38px; height:38px; font-size:1rem; }
+
+  /* accordion blocks bigger */
+  .accordion-btn{ font-size:1.35rem; padding:1.6rem 0; }
+
+  /* tags slightly larger */
+  .tag{ font-size:.78rem; padding:.5rem 1.1rem; }
+</style>
+</head>
+<body data-theme="">
+<!-- ============ NAVBAR ============ -->
+<nav id="navbar" class="fixed left-0 right-0 z-50" style="top:0;">
+  <div class="max-w-6xl mx-auto px-6 flex items-center justify-between transition-all duration-300" id="navInner" style="height:78px;">
+    <a href="#top" class="flex items-center shrink-0">
+      <img src="investing%20compass.svg" alt="Investment Compass" class="h-6 md:h-8 w-auto">
+    </a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#picks" class="nav-link">This Month's Pick</a>
+      <a href="#how" class="nav-link">How It Works</a>
+      <a href="#track" class="nav-link">Track Record</a>
+      <a href="#why" class="nav-link">FAQ</a>
+    </div>
+    <div class="hidden md:block">
+      <a href="#subscribe" class="btn-primary" style="height:44px; padding:0 20px; font-size:14px;">Get Monthly Emails</a>
+    </div>
+    <button id="menuBtn" class="md:hidden p-2 -mr-2" aria-label="Menu">
+      <svg id="menuIconOpen" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg id="menuIconClose" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" class="hidden"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+  </div>
+  <div id="mobileMenu" class="hidden md:hidden flex-col mx-4 mt-3 px-6 rounded-2xl overflow-hidden" style="background:var(--offwhite); border:1px solid var(--border); box-shadow:0 20px 60px rgba(30,32,29,.12);">
+    <a href="#picks" class="py-3 nav-link border-b" style="border-color:var(--border-soft)">This Month's Pick</a>
+    <a href="#how" class="py-3 nav-link border-b" style="border-color:var(--border-soft)">How It Works</a>
+    <a href="#track" class="py-3 nav-link border-b" style="border-color:var(--border-soft)">Track Record</a>
+    <a href="#why" class="py-3 nav-link border-b" style="border-color:var(--border-soft)">FAQ</a>
+    <a href="#subscribe" class="btn-primary justify-center mt-4">Get Monthly Emails</a>
+  </div>
+</nav>
+
+<!-- ============ HERO ============ -->
+<section id="top" class="relative overflow-hidden pt-36 md:pt-44 pb-20 px-6">
+  <div class="blob w-[420px] h-[420px] -top-40 -left-40" style="background:var(--c-tlt)"></div>
+  <div class="blob w-[380px] h-[380px] top-20 -right-32" style="background:var(--terracotta)"></div>
+  <div class="max-w-6xl mx-auto grid lg:grid-cols-2 gap-14 items-center relative z-10">
+    <div class="reveal" data-reveal>
+      <div class="tag blue">Rebalances on the 1st of every month</div>
+      <h1 class="heading text-4xl sm:text-5xl font-extrabold leading-[1.06] mt-6">
+        <span class="gradient-text">One ETF<span class="etf-tip"><sup>*</sup><span class="etf-bubble">A basket of stocks you can buy like one.</span></span> to buy.<br>
+        <span style="opacity:.4">Once a month. That's the system.</span></span>
+      </h1>
+      <p class="mt-6 text-lg md:text-xl leading-relaxed max-w-lg" style="color:var(--charcoal-soft)">
+        Each month we compare a small set of ETFs on momentum and name the one worth holding. Buy it at any broker, hold it for the month, then check back â€” no charts, no news, no guessing.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a href="#picks" class="btn-primary shimmer">See This Month's Pick <span aria-hidden="true">â†’</span></a>
+        <a href="#subscribe" class="btn-outline">Get It By Email</a>
+      </div>
+      <div class="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm" style="color:var(--charcoal-soft)">
+        <div><span class="mono font-bold" style="color:var(--charcoal)">3</span> ETFs, one rule</div>
+        <div class="w-px h-8 hidden sm:block" style="background:var(--border)"></div>
+        <div><span class="mono font-bold" style="color:var(--charcoal)" id="heroYearsStat">18</span> years backtested on real prices</div>
+      </div>
+    </div>
+    <div class="card p-6 md:p-7 relative reveal" data-reveal data-reveal-delay="0.15">
+      <div class="tag" style="background:var(--terracotta-dim);color:var(--terracotta)">
+        <span class="pulse-dot"></span><span id="heroDataBadge">DATA THROUGH AUG 2026</span>
+      </div>
+      <div class="mt-4">
+        <div class="text-sm uppercase tracking-wide font-semibold" style="color:var(--charcoal-soft)">Growth of $10,000, this system's rule</div>
+        <div class="flex items-baseline gap-3 mt-1 flex-wrap">
+          <div class="heading text-5xl font-extrabold" id="heroReturn">â€”</div>
+          <div class="text-base" style="color:var(--charcoal-soft)">vs <span id="heroSpyReturn" class="font-semibold">â€”</span> for SPY alone</div>
+        </div>
+      </div>
+      <div class="mt-3 relative" style="height:210px">
+        <svg id="heroChart" viewBox="0 0 640 260" class="w-full h-full" preserveAspectRatio="none"></svg>
+      </div>
+      <div class="flex items-center justify-between mt-1 text-sm mono" style="color:var(--charcoal-soft)">
+        <span id="heroDateStart">Jun 2008</span><span id="heroDateEnd">Aug 2026</span>
+      </div>
+      <div class="flex items-center gap-5 mt-3 text-sm" style="color:var(--charcoal-soft)">
+        <div class="flex items-center gap-1.5"><span class="inline-block w-3 h-[3px] rounded-full" style="background:var(--curve)"></span> This system</div>
+        <div class="flex items-center gap-1.5"><span class="inline-block w-3 h-[3px] rounded-full" style="background:var(--charcoal-soft);opacity:.55"></span> SPY buy &amp; hold</div>
+      </div>
+      <div class="update-badge float">
+        <div class="flex items-center gap-3">
+          <div class="icon-tile">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg>
+          </div>
+          <div>
+            <p class="text-[10px] font-bold tracking-widest uppercase" style="color:var(--charcoal-soft)">Next update</p>
+            <p class="heading font-bold text-sm" id="nextUpdateDate">May 01</p>
+            <p class="text-[10px] font-semibold countdown mono mt-0.5" id="nextUpdateCountdown">in â€” days</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PICKS ============ -->
+<section id="picks" class="px-6 py-20">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto reveal" data-reveal>
+      <div class="tag yellow" style="margin:0 auto">This month's signal</div>
+      <h2 class="heading text-4xl md:text-5xl font-extrabold mt-6" id="picksTitle">This month's pick</h2>
+      <p class="mt-5 text-lg md:text-xl" style="color:var(--charcoal-soft)" id="picksSubtitle">Loadingâ€¦</p>
+    </div>
+
+    <div class="mt-12 grid lg:grid-cols-5 gap-6">
+      <!-- Featured card(s) -->
+      <div class="lg:col-span-3" id="cardsGrid"></div>
+      <!-- Why it won -->
+      <div class="lg:col-span-2 card p-7 md:p-9 reveal transition-all duration-300 hover:-translate-y-1.5" data-reveal id="whyCard">
+        <div class="flex items-center gap-3"><span class="tag yellow">Plain English</span><span class="tag coral">1 ETF, so far</span></div>
+        <h3 class="heading text-2xl md:text-3xl font-extrabold mt-5">Why this <span class="etf-tip">ETF<sup>*</sup><span class="etf-bubble">A basket of stocks you can buy like one.</span></span> won the signal</h3>
+        <p class="text-base md:text-lg mt-3" style="color:var(--charcoal-soft)">Each month we score three ETFs on their recent moves â€” the last 1, 3 and 6 months â€” and the highest score gets your money. If both stock ETFs are losing, the rules shelter in long-term bonds instead. <em>New here? An ETF is just a basket of stocks you can buy like a single stock.</em></p>
+        <div class="mt-7 space-y-5" id="compareBars"></div>
+      </div>
+    </div>
+
+    <!-- Split panel -->
+    <div class="mt-8 card p-7 md:p-10 reveal" data-reveal>
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-5">
+        <div>
+          <h3 class="heading text-2xl md:text-3xl font-extrabold">How to split your money</h3>
+          <p class="text-base md:text-lg mt-1.5" style="color:var(--charcoal-soft)" id="splitExplainer">Loadingâ€¦</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-base font-semibold" style="color:var(--charcoal-soft)">I have</span>
+          <span class="relative">
+            <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-base" style="color:var(--charcoal-soft)">$</span>
+            <input id="capitalInput" type="text" inputmode="numeric" value="1,000" class="w-36 pl-6 text-lg font-bold mono" style="padding-top:12px;padding-bottom:12px;">
+          </span>
+          <span class="text-base font-semibold" style="color:var(--charcoal-soft)">to invest</span>
+        </div>
+      </div>
+      <div class="mt-7" id="walletBar"></div>
+      <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2" id="walletLegend"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HOW IT WORKS ============ -->
+<section id="how" class="px-6 py-20" style="background:var(--offwhite)">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto reveal" data-reveal>
+      <div class="tag blue" style="margin:0 auto">Four steps</div>
+      <h2 class="heading text-4xl md:text-5xl font-extrabold mt-6">How it works</h2>
+      <p class="mt-5 text-lg md:text-xl" style="color:var(--charcoal-soft)">No background in investing required. If you can read a card, you can follow this.</p>
+    </div>
+    <div class="mt-16 grid lg:grid-cols-2 gap-10 items-start">
+      <div class="space-y-3" id="stepsList">
+        <div class="step-item active" data-step="0">
+          <div class="flex items-center gap-4">
+            <div class="step-num">1</div>
+            <div>
+              <div class="font-bold heading text-lg leading-snug">Check this month's pick</div>
+              <div class="text-sm mt-1 leading-snug" style="color:var(--charcoal-soft)">Come by on or after the 1st â€” the one ETF the rule chose is at the top.</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-item" data-step="1">
+          <div class="flex items-center gap-4">
+            <div class="step-num">2</div>
+            <div>
+              <div class="font-bold heading text-lg leading-snug">Buy that one ETF</div>
+              <div class="text-sm mt-1 leading-snug" style="color:var(--charcoal-soft)">It's a single position, so there's nothing to split. Buy it in any regular brokerage account.</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-item" data-step="2">
+          <div class="flex items-center gap-4">
+            <div class="step-num">3</div>
+            <div>
+              <div class="font-bold heading text-lg leading-snug">Leave it alone for the month</div>
+              <div class="text-sm mt-1 leading-snug" style="color:var(--charcoal-soft)">No charts, no news, no day-trading. Hold it â€” that's the whole strategy.</div>
+            </div>
+          </div>
+        </div>
+        <div class="step-item" data-step="3">
+          <div class="flex items-center gap-4">
+            <div class="step-num">4</div>
+            <div>
+              <div class="font-bold heading text-lg leading-snug">Come back on the 1st</div>
+              <div class="text-sm mt-1 leading-snug" style="color:var(--charcoal-soft)">The rule re-scores each month. Check back, or opt in below and get it by email.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card p-7 md:p-9 min-h-[420px] flex flex-col reveal" data-reveal data-reveal-delay="0.1">
+        <div id="previewWrap" class="flex-1"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TRACK RECORD ============ -->
+<section id="track" class="px-6 py-20">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center max-w-2xl mx-auto reveal" data-reveal>
+      <div class="tag green" style="margin:0 auto">Track record</div>
+      <h2 class="heading text-4xl md:text-5xl font-extrabold mt-6">What this rule would have done since 2008</h2>
+      <p class="mt-5 text-lg md:text-xl" style="color:var(--charcoal-soft)">The chart rebuilds the exact rule above, month by month, using real total-return prices for SPY, SCZ and TLT back to SCZ's December 2007 launch.</p>
+    </div>
+
+    <div class="mt-12 card p-7 md:p-9 reveal" data-reveal>
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-2">
+        <div class="flex items-center gap-5 text-base">
+          <div class="flex items-center gap-1.5"><span class="inline-block w-3 h-[3px] rounded-full" style="background:var(--curve)"></span> This system</div>
+          <div class="flex items-center gap-1.5"><span class="inline-block w-3 h-[3px] rounded-full" style="background:var(--charcoal-soft);opacity:.55"></span> SPY buy &amp; hold</div>
+        </div>
+        <div class="text-sm mono" style="color:var(--charcoal-soft)" id="trackRange">Jun 2008 â€“ Aug 2026</div>
+      </div>
+      <div class="relative" style="height:380px">
+        <svg id="bigChart" viewBox="0 0 1000 400" class="w-full h-full" preserveAspectRatio="none"></svg>
+        <div id="bigTooltip" class="absolute hidden card px-3 py-2 text-xs pointer-events-none" style="box-shadow:var(--shadow)"></div>
+      </div>
+    </div>
+
+    <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-4 gap-4" id="statCards"></div>
+
+    <div class="mt-6 grid lg:grid-cols-2 gap-6">
+      <div class="card p-7 md:p-8 reveal" data-reveal>
+        <h3 class="heading text-xl md:text-2xl font-extrabold">Where the money has actually been</h3>
+        <p class="text-base mt-2" style="color:var(--charcoal-soft)">Share of months the rule has held each ETF since 2008.</p>
+        <div class="mt-6" id="timeInAssetBar"></div>
+        <div class="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-base" id="timeInAssetLegend"></div>
+      </div>
+      <div class="card p-7 md:p-8 reveal" data-reveal>
+        <h3 class="heading text-xl md:text-2xl font-extrabold">Most recent rotations</h3>
+        <p class="text-base mt-2" style="color:var(--charcoal-soft)">Every time the rule has switched holdings recently.</p>
+        <div class="mt-6 space-y-3" id="recentTrades"></div>
+      </div>
+    </div>
+
+    <p class="text-sm mt-6 max-w-3xl" style="color:var(--charcoal-soft)">Hypothetical, backtested performance â€” not an actual account. Excludes trading costs, spreads and taxes, which would lower real-world returns. Past performance does not guarantee or predict future results.</p>
+  </div>
+</section>
+
+<!-- ============ WHY / FAQ ============ -->
+<section id="why" class="px-6 py-20" style="background:var(--offwhite)">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center reveal" data-reveal>
+      <div class="tag coral" style="margin:0 auto">Good to know</div>
+      <h2 class="heading text-4xl md:text-5xl font-extrabold mt-6">Questions people ask</h2>
+    </div>
+    <div class="mt-10" id="faqList">
+      <div class="accordion-item">
+        <button class="accordion-btn">
+          <span class="font-bold heading">What is this, exactly?</span>
+          <span class="accordion-plus text-2xl" style="color:var(--terracotta)">+</span>
+        </button>
+        <div class="accordion-panel">
+          <p class="pb-6 text-base leading-relaxed" style="color:var(--charcoal-soft)">A single monthly signal: the ETF our rule currently favors, built from public price data. It's free to follow, there are no sponsors or paid placements, and the whole method is explained on this page.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn">
+          <span class="font-bold heading">How is the pick actually chosen?</span>
+          <span class="accordion-plus text-2xl" style="color:var(--terracotta)">+</span>
+        </button>
+        <div class="accordion-panel">
+          <p class="pb-6 text-base leading-relaxed" style="color:var(--charcoal-soft)">Every month we compare US stocks (SPY) against international small-cap stocks (SCZ), each scored by adding up its own 1-month, 3-month and 6-month return. Whichever scores higher gets 100% of the allocation. It's a version of a strategy sometimes called Accelerating Dual Momentum.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn">
+          <span class="font-bold heading">What if it picks bonds instead?</span>
+          <span class="accordion-plus text-2xl" style="color:var(--terracotta)">+</span>
+        </button>
+        <div class="accordion-panel">
+          <p class="pb-6 text-base leading-relaxed" style="color:var(--charcoal-soft)">If SPY and SCZ are <em>both</em> scoring negative at the same time, the rule moves entirely into TLT (long-term US Treasuries) instead of holding a losing stock ETF. It stays there until one of the two turns positive again â€” the system's way of stepping to the sideline during rough stretches.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn">
+          <span class="font-bold heading">Where do the numbers come from, and how fresh are they?</span>
+          <span class="accordion-plus text-2xl" style="color:var(--terracotta)">+</span>
+        </button>
+        <div class="accordion-panel">
+          <p class="pb-6 text-base leading-relaxed" style="color:var(--charcoal-soft)">Public market prices for SPY, SCZ and TLT. The rule only needs month-end prices, so figures are refreshed around the start of each month rather than in real time â€” the exact "data as of" date is shown above the pick. The engine on this page recomputes the score itself from that data; nothing is manually typed in.</p>
+        </div>
+      </div>
+      <div class="accordion-item">
+        <button class="accordion-btn">
+          <span class="font-bold heading">Is this financial advice?</span>
+          <span class="accordion-plus text-2xl" style="color:var(--terracotta)">+</span>
+        </button>
+        <div class="accordion-panel">
+          <p class="pb-6 text-base leading-relaxed" style="color:var(--charcoal-soft)">No. This is an independent, rules-based signal shown for informational purposes, not a personalized recommendation. All investing carries risk, including loss of principal, and past performance doesn't guarantee future results. Consider your own situation and talk to a licensed advisor for advice tailored to you.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SUBSCRIBE ============ -->
+<section id="subscribe" class="px-6 py-20">
+  <div class="max-w-3xl mx-auto rounded-[2.5rem] text-center relative overflow-hidden reveal" data-reveal style="background:var(--terracotta); box-shadow:0 24px 80px rgba(229,71,45,.35);" id="subscribeCard">
+    <div class="blob w-[280px] h-[280px] -top-20 -right-20" style="background:#fff; opacity:.14"></div>
+    <div class="relative z-10 p-8 md:p-14">
+      <div class="w-14 h-14 mx-auto rounded-2xl flex items-center justify-center" style="background:#fff;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--terracotta)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.2"/><path d="M3 6.5l9 6.5 9-6.5"/></svg>
+      </div>
+      <h2 class="heading text-3xl md:text-4xl font-extrabold mt-5" style="color:#fff">Get next month's pick by email</h2>
+      <p class="mt-3 max-w-md mx-auto text-base md:text-lg" style="color:rgba(255,255,255,.85)">One email, on the 1st, whenever the rule updates. Nothing daily, nothing else.</p>
+      <form id="subscribeForm" class="mt-7 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+        <input id="subEmail" type="email" required placeholder="you@email.com" class="flex-1 text-base" style="padding-top:16px;padding-bottom:16px; background:#fff; border:2px solid transparent; border-radius:999px; padding-left:24px; padding-right:24px;">
+        <button type="submit" class="btn-primary justify-center whitespace-nowrap" style="height:54px;">Notify Me</button>
+      </form>
+      <div id="subSuccess" class="hidden mt-7 flex items-center justify-center gap-2 font-semibold text-lg" style="color:#fff">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
+        You're on the list â€” see you on the 1st.
+      </div>
+      <p id="subError" class="hidden mt-4 text-sm font-semibold" style="color:#fff">That doesn't look like a valid email â€” mind trying again?</p>
+      <p class="mt-5 text-sm" style="color:rgba(255,255,255,.7)">No spam, unsubscribe anytime. This is a personal project, not a licensed advisory service.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ FOOTER ============ -->
+<footer class="px-6 py-10" style="border-top:1px solid var(--border)">
+  <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+    <a href="#top" class="shrink-0">
+      <img src="investing%20compass.svg" alt="Investment Compass" class="h-8 md:h-9 w-auto">
+    </a>
+    <p class="text-sm text-center" style="color:var(--charcoal-soft)">Â© <span id="footYear">2026</span> InvestCompass. Not financial advice. Informational use only.</p>
+    <a href="#subscribe" class="text-sm font-semibold" style="color:var(--terracotta)">Get monthly emails â†’</a>
+  </div>
+</footer>
+
+<script>
+(function(){
+'use strict';
+// ============ DATA (real monthly total-return prices, Dec 2007 - Aug 2026) ============
+// Source: public price histories for SPY / SCZ / TLT. Dividend/split adjusted.
+// Refresh monthly by appending the newest month-end row to each array below.
+const MONTHLY = {
+  SPY: [["2007-12",104.14],["2008-01",97.84],["2008-02",95.31],["2008-03",94.46],["2008-04",98.96],["2008-05",100.46],["2008-06",92.06],["2008-07",91.24],["2008-08",92.64],["2008-09",83.92],["2008-10",70.06],["2008-11",65.18],["2008-12",65.82],["2009-01",60.42],["2009-02",53.92],["2009-03",58.42],["2009-04",64.22],["2009-05",67.97],["2009-06",67.93],["2009-07",73.0],["2009-08",75.69],["2009-09",78.38],["2009-10",76.87],["2009-11",81.61],["2009-12",83.17],["2010-01",80.14],["2010-02",82.64],["2010-03",87.68],["2010-04",89.03],["2010-05",81.96],["2010-06",77.72],["2010-07",83.02],["2010-08",79.29],["2010-09",86.39],["2010-10",89.69],["2010-11",89.69],["2010-12",95.69],["2011-01",97.92],["2011-02",101.32],["2011-03",101.33],["2011-04",104.27],["2011-05",103.1],["2011-06",101.36],["2011-07",99.33],["2011-08",93.87],["2011-09",87.35],["2011-10",96.89],["2011-11",96.49],["2011-12",97.5],["2012-01",102.02],["2012-02",106.45],["2012-03",109.88],["2012-04",109.14],["2012-05",102.59],["2012-06",106.75],["2012-07",108.01],["2012-08",110.72],["2012-09",113.53],["2012-10",111.46],["2012-11",112.09],["2012-12",113.09],["2013-01",118.88],["2013-02",120.4],["2013-03",124.97],["2013-04",127.37],["2013-05",130.38],["2013-06",128.64],["2013-07",135.29],["2013-08",131.23],["2013-09",135.38],["2013-10",141.65],["2013-11",145.85],["2013-12",149.63],["2014-01",144.36],["2014-02",150.93],["2014-03",152.18],["2014-04",153.24],["2014-05",156.79],["2014-06",160.03],["2014-07",157.88],["2014-08",164.11],["2014-09",161.84],["2014-10",165.66],["2014-11",170.21],["2014-12",169.78],["2015-01",164.74],["2015-02",174.0],["2015-03",171.27],["2015-04",172.96],["2015-05",175.18],["2015-06",171.62],["2015-07",175.5],["2015-08",164.8],["2015-09",160.6],["2015-10",174.26],["2015-11",174.89],["2015-12",171.87],["2016-01",163.31],["2016-02",163.18],["2016-03",174.16],["2016-04",174.84],["2016-05",177.82],["2016-06",178.43],["2016-07",184.94],["2016-08",185.16],["2016-09",185.17],["2016-10",181.96],["2016-11",188.67],["2016-12",192.49],["2017-01",195.94],["2017-02",203.64],["2017-03",203.89],["2017-04",205.91],["2017-05",208.82],["2017-06",210.15],["2017-07",214.47],["2017-08",215.1],["2017-09",219.43],["2017-10",224.6],["2017-11",231.46],["2017-12",234.27],["2018-01",247.48],["2018-02",238.48],["2018-03",231.94],["2018-04",233.14],["2018-05",238.81],["2018-06",240.18],["2018-07",249.08],["2018-08",257.03],["2018-09",258.56],["2018-10",240.69],["2018-11",245.15],["2018-12",223.57],["2019-01",241.47],["2019-02",249.3],["2019-03",253.81],["2019-04",264.18],["2019-05",247.33],["2019-06",264.54],["2019-07",268.54],["2019-08",264.04],["2019-09",269.18],["2019-10",275.13],["2019-11",285.09],["2019-12",293.38],["2020-01",293.26],["2020-02",270.04],["2020-03",236.32],["2020-04",266.33],["2020-05",279.02],["2020-06",283.97],["2020-07",300.69],["2020-08",321.68],["2020-09",309.63],["2020-10",301.91],["2020-11",334.75],["2020-12",347.16],["2021-01",343.62],["2021-02",353.17],["2021-03",369.2],["2021-04",388.74],["2021-05",391.29],["2021-06",400.07],["2021-07",409.83],["2021-08",422.03],["2021-09",402.36],["2021-10",430.59],["2021-11",427.13],["2021-12",446.89],["2022-01",423.32],["2022-02",410.83],["2022-03",426.27],["2022-04",388.86],["2022-05",389.73],["2022-06",357.6],["2022-07",390.53],["2022-08",374.59],["2022-09",339.96],["2022-10",367.59],["2022-11",388.03],["2022-12",365.67],["2023-01",388.66],["2023-02",378.89],["2023-03",392.94],["2023-04",399.22],["2023-05",401.06],["2023-06",427.05],["2023-07",441.03],["2023-08",433.86],["2023-09",413.28],["2023-10",404.31],["2023-11",441.24],["2023-12",461.38],["2024-01",468.73],["2024-02",493.2],["2024-03",509.32],["2024-04",488.79],["2024-05",513.51],["2024-06",531.63],["2024-07",538.06],["2024-08",550.64],["2024-09",562.2],["2024-10",557.19],["2024-11",590.41],["2024-12",576.21],["2025-01",591.68],["2025-02",584.17],["2025-03",551.62],["2025-04",546.84],["2025-05",581.2],["2025-06",611.08],["2025-07",625.15],["2025-08",637.98],["2025-09",660.71],["2025-10",676.46],["2025-11",677.78],["2025-12",678.32],["2026-01",688.31],["2026-02",682.36],["2026-03",648.67],["2026-04",716.81],["2026-05",754.54],["2026-06",746.77],["2026-07",747.03],["2026-08",766.95]],
+  SCZ: [["2007-12",30.73],["2008-01",27.52],["2008-02",27.42],["2008-03",27.94],["2008-04",28.48],["2008-05",29.08],["2008-06",26.83],["2008-07",25.05],["2008-08",24.15],["2008-09",20.6],["2008-10",15.7],["2008-11",14.55],["2008-12",15.81],["2009-01",13.99],["2009-02",12.69],["2009-03",13.92],["2009-04",15.84],["2009-05",18.36],["2009-06",18.68],["2009-07",20.25],["2009-08",21.54],["2009-09",22.6],["2009-10",22.03],["2009-11",22.25],["2009-12",22.59],["2010-01",22.11],["2010-02",21.97],["2010-03",23.6],["2010-04",23.74],["2010-05",20.78],["2010-06",20.69],["2010-07",22.84],["2010-08",21.81],["2010-09",24.42],["2010-10",25.52],["2010-11",24.64],["2010-12",27.45],["2011-01",27.64],["2011-02",28.27],["2011-03",28.19],["2011-04",29.85],["2011-05",29.12],["2011-06",28.75],["2011-07",28.26],["2011-08",25.94],["2011-09",23.03],["2011-10",24.74],["2011-11",24.11],["2011-12",23.31],["2012-01",25.37],["2012-02",26.7],["2012-03",26.91],["2012-04",26.7],["2012-05",23.64],["2012-06",24.62],["2012-07",24.33],["2012-08",25.3],["2012-09",26.37],["2012-10",26.57],["2012-11",26.96],["2012-12",28.26],["2013-01",29.46],["2013-02",29.85],["2013-03",30.52],["2013-04",31.61],["2013-05",30.34],["2013-06",29.51],["2013-07",31.58],["2013-08",31.37],["2013-09",34.14],["2013-10",35.16],["2013-11",35.26],["2013-12",36.36],["2014-01",35.35],["2014-02",37.61],["2014-03",37.23],["2014-04",37.1],["2014-05",37.52],["2014-06",38.16],["2014-07",36.9],["2014-08",36.97],["2014-09",34.98],["2014-10",35.0],["2014-11",34.54],["2014-12",34.16],["2015-01",34.25],["2015-02",36.64],["2015-03",36.18],["2015-04",37.73],["2015-05",38.37],["2015-06",37.74],["2015-07",38.06],["2015-08",36.29],["2015-09",35.34],["2015-10",37.07],["2015-11",37.33],["2015-12",37.27],["2016-01",34.94],["2016-02",34.34],["2016-03",37.16],["2016-04",37.6],["2016-05",38.26],["2016-06",36.49],["2016-07",38.38],["2016-08",38.45],["2016-09",39.63],["2016-10",38.49],["2016-11",37.51],["2016-12",38.25],["2017-01",39.71],["2017-02",40.52],["2017-03",41.55],["2017-04",43.3],["2017-05",44.72],["2017-06",44.98],["2017-07",46.52],["2017-08",46.85],["2017-09",48.22],["2017-10",49.03],["2017-11",49.48],["2017-12",50.76],["2018-01",53.4],["2018-02",51.36],["2018-03",51.3],["2018-04",51.64],["2018-05",51.14],["2018-06",49.96],["2018-07",50.55],["2018-08",49.96],["2018-09",49.6],["2018-10",44.79],["2018-11",44.78],["2018-12",41.81],["2019-01",45.19],["2019-02",46.11],["2019-03",46.34],["2019-04",47.85],["2019-05",45.14],["2019-06",47.08],["2019-07",46.37],["2019-08",45.59],["2019-09",46.94],["2019-10",48.87],["2019-11",50.04],["2019-12",52.13],["2020-01",50.14],["2020-02",45.66],["2020-03",37.52],["2020-04",41.11],["2020-05",44.43],["2020-06",45.34],["2020-07",46.55],["2020-08",49.98],["2020-09",49.88],["2020-10",48.15],["2020-11",54.38],["2020-12",58.23],["2021-01",58.01],["2021-02",59.8],["2021-03",61.2],["2021-04",63.52],["2021-05",64.86],["2021-06",63.77],["2021-07",64.87],["2021-08",66.69],["2021-09",63.98],["2021-10",65.56],["2021-11",61.84],["2021-12",64.12],["2022-01",60.22],["2022-02",58.43],["2022-03",58.2],["2022-04",54.13],["2022-05",54.38],["2022-06",48.79],["2022-07",52.02],["2022-08",48.96],["2022-09",43.6],["2022-10",45.53],["2022-11",50.94],["2022-12",50.48],["2023-01",54.64],["2023-02",52.93],["2023-03",53.19],["2023-04",54.37],["2023-05",52.01],["2023-06",53.6],["2023-07",55.71],["2023-08",53.79],["2023-09",51.32],["2023-10",48.91],["2023-11",53.22],["2023-12",57.03],["2024-01",55.56],["2024-02",56.43],["2024-03",58.35],["2024-04",56.36],["2024-05",59.45],["2024-06",57.6],["2024-07",60.54],["2024-08",61.68],["2024-09",63.26],["2024-10",59.3],["2024-11",59.79],["2024-12",57.89],["2025-01",59.62],["2025-02",59.92],["2025-03",60.54],["2025-04",63.37],["2025-05",67.31],["2025-06",70.31],["2025-07",70.05],["2025-08",73.1],["2025-09",74.22],["2025-10",73.72],["2025-11",74.94],["2025-12",76.46],["2026-01",80.64],["2026-02",84.54],["2026-03",77.33],["2026-04",82.44],["2026-05",85.3],["2026-06",82.27],["2026-07",83.9],["2026-08",86.8]],
+  TLT: [["2007-12",52.5],["2008-01",53.6],["2008-02",53.36],["2008-03",54.5],["2008-04",53.15],["2008-05",51.72],["2008-06",53.09],["2008-07",52.89],["2008-08",54.34],["2008-09",55.14],["2008-10",54.12],["2008-11",61.88],["2008-12",70.33],["2009-01",61.13],["2009-02",60.2],["2009-03",62.63],["2009-04",58.28],["2009-05",56.13],["2009-06",56.55],["2009-07",56.87],["2009-08",58.14],["2009-09",59.57],["2009-10",58.01],["2009-11",58.72],["2009-12",54.99],["2010-01",56.47],["2010-02",56.28],["2010-03",55.12],["2010-04",56.95],["2010-05",59.86],["2010-06",63.33],["2010-07",62.73],["2010-08",67.99],["2010-09",66.28],["2010-10",63.32],["2010-11",62.25],["2010-12",59.95],["2011-01",58.1],["2011-02",59.06],["2011-03",59.08],["2011-04",60.46],["2011-05",62.53],["2011-06",61.07],["2011-07",63.77],["2011-08",69.94],["2011-09",79.17],["2011-10",76.14],["2011-11",77.65],["2011-12",80.33],["2012-01",80.06],["2012-02",77.98],["2012-03",74.68],["2012-04",78.29],["2012-05",85.36],["2012-06",83.92],["2012-07",87.13],["2012-08",85.98],["2012-09",83.8],["2012-10",83.4],["2012-11",84.55],["2012-12",82.44],["2013-01",79.82],["2013-02",80.81],["2013-03",80.47],["2013-04",84.24],["2013-05",78.54],["2013-06",75.97],["2013-07",74.26],["2013-08",73.26],["2013-09",73.74],["2013-10",74.8],["2013-11",72.78],["2013-12",71.42],["2014-01",75.92],["2014-02",76.31],["2014-03",76.87],["2014-04",78.48],["2014-05",80.8],["2014-06",80.6],["2014-07",81.13],["2014-08",84.96],["2014-09",83.17],["2014-10",85.52],["2014-11",88.05],["2014-12",90.92],["2015-01",99.84],["2015-02",93.71],["2015-03",94.74],["2015-04",91.49],["2015-05",89.32],["2015-06",85.68],["2015-07",89.58],["2015-08",88.96],["2015-09",90.71],["2015-10",90.34],["2015-11",89.56],["2015-12",89.29],["2016-01",94.26],["2016-02",97.17],["2016-03",97.08],["2016-04",96.37],["2016-05",97.14],["2016-06",103.88],["2016-07",106.06],["2016-08",104.99],["2016-09",103.41],["2016-10",98.88],["2016-11",90.76],["2016-12",90.34],["2017-01",91.07],["2017-02",92.51],["2017-03",91.91],["2017-04",93.35],["2017-05",95.12],["2017-06",95.87],["2017-07",95.24],["2017-08",98.48],["2017-09",96.2],["2017-10",96.16],["2017-11",96.88],["2017-12",98.63],["2018-01",95.42],["2018-02",92.52],["2018-03",95.16],["2018-04",93.18],["2018-05",95.04],["2018-06",95.66],["2018-07",94.28],["2018-08",95.52],["2018-09",92.79],["2018-10",90.07],["2018-11",91.68],["2018-12",97.04],["2019-01",97.41],["2019-02",96.07],["2019-03",101.42],["2019-04",99.4],["2019-05",106.2],["2019-06",107.21],["2019-07",107.48],["2019-08",119.36],["2019-09",116.16],["2019-10",114.87],["2019-11",114.4],["2019-12",110.74],["2020-01",119.26],["2020-02",127.16],["2020-03",135.27],["2020-04",136.92],["2020-05",134.51],["2020-06",134.96],["2020-07",140.95],["2020-08",133.84],["2020-09",134.87],["2020-10",130.3],["2020-11",132.47],["2020-12",130.85],["2021-01",126.09],["2021-02",118.86],["2021-03",112.63],["2021-04",115.44],["2021-05",115.44],["2021-06",120.54],["2021-07",125.02],["2021-08",124.6],["2021-09",120.98],["2021-10",123.96],["2021-11",127.39],["2021-12",124.83],["2022-01",119.94],["2022-02",117.98],["2022-03",111.56],["2022-04",101.05],["2022-05",98.77],["2022-06",97.51],["2022-07",99.88],["2022-08",95.33],["2022-09",87.48],["2022-10",82.27],["2022-11",88.15],["2022-12",85.84],["2023-01",92.4],["2023-02",87.92],["2023-03",92.17],["2023-04",92.48],["2023-05",89.7],["2023-06",89.89],["2023-07",87.6],["2023-08",84.85],["2023-09",78.1],["2023-10",73.84],["2023-11",81.16],["2023-12",88.22],["2024-01",86.23],["2024-02",84.29],["2024-03",84.95],["2024-04",79.47],["2024-05",81.77],["2024-06",83.25],["2024-07",86.28],["2024-08",88.1],["2024-09",89.86],["2024-10",84.95],["2024-11",86.64],["2024-12",81.11],["2025-01",81.51],["2025-02",86.16],["2025-03",85.12],["2025-04",83.96],["2025-05",81.26],["2025-06",83.43],["2025-07",82.48],["2025-08",82.49],["2025-09",85.46],["2025-10",86.64],["2025-11",86.87],["2025-12",84.56],["2026-01",84.53],["2026-02",88.45],["2026-03",84.71],["2026-04",84.0],["2026-05",84.44],["2026-06",85.43],["2026-07",81.61],["2026-08",82.2]]
+};
+const CURRENT_PRICES = { SPY: 762.60, SCZ: 85.14, TLT: 81.25 };
+
+const TICKER_META = {
+  SPY: { name: 'SPDR S&P 500 ETF', blurb: 'US large-cap stocks', color: 'var(--c-spy)' },
+  SCZ: { name: 'iShares MSCI EAFE Small-Cap ETF', blurb: 'International small-cap stocks', color: 'var(--c-scz)' },
+  TLT: { name: 'iShares 20+ Year Treasury Bond ETF', blurb: 'Long-term US Treasuries', color: 'var(--c-tlt)' }
+};
+
+// ============ ENGINE ============
+// Exact port of the Accelerating Dual Momentum rule: SPY vs SCZ, scored by
+// summed 1M+3M+6M returns computed from month-end closes; hold TLT only if
+// both stock ETFs score negative; otherwise hold whichever scores higher.
+function computeEngine(monthly) {
+  const dates = monthly.SPY.map(function (d) { return d[0]; });
+  const N = dates.length;
+  const P = {};
+  ['SPY', 'SCZ', 'TLT'].forEach(function (k) { P[k] = monthly[k].map(function (d) { return d[1]; }); });
+
+  function scoreAt(i) {
+    const spy1 = P.SPY[i] / P.SPY[i - 1] - 1, spy3 = P.SPY[i] / P.SPY[i - 3] - 1, spy6 = P.SPY[i] / P.SPY[i - 6] - 1;
+    const scz1 = P.SCZ[i] / P.SCZ[i - 1] - 1, scz3 = P.SCZ[i] / P.SCZ[i - 3] - 1, scz6 = P.SCZ[i] / P.SCZ[i - 6] - 1;
+    const tlt1 = P.TLT[i] / P.TLT[i - 1] - 1, tlt3 = P.TLT[i] / P.TLT[i - 3] - 1, tlt6 = P.TLT[i] / P.TLT[i - 6] - 1;
+    const spyScore = spy1 + spy3 + spy6, sczScore = scz1 + scz3 + scz6;
+    let selected;
+    if (spyScore < 0 && sczScore < 0) selected = 'TLT';
+    else if (spyScore >= sczScore) selected = 'SPY';
+    else selected = 'SCZ';
+    return { selected: selected, spyScore: spyScore, sczScore: sczScore, spy1: spy1, spy3: spy3, spy6: spy6, scz1: scz1, scz3: scz3, scz6: scz6, tlt1: tlt1, tlt3: tlt3, tlt6: tlt6 };
+  }
+
+  let nav = 10000;
+  const navSeries = [{ date: dates[6], nav: 10000 }];
+  const trades = [];
+  const holdCounts = { SPY: 0, SCZ: 0, TLT: 0 };
+  let prevTicker = null;
+
+  for (let k = 6; k < N - 1; k++) {
+    const s = scoreAt(k);
+    const ret = P[s.selected][k + 1] / P[s.selected][k] - 1;
+    nav *= (1 + ret);
+    navSeries.push({ date: dates[k + 1], nav: nav });
+    holdCounts[s.selected]++;
+    if (s.selected !== prevTicker) trades.push({ date: dates[k], ticker: s.selected, spyScore: s.spyScore, sczScore: s.sczScore });
+    prevTicker = s.selected;
+  }
+
+  const spyBase = P.SPY[6];
+  const spyBH = navSeries.map(function (p, idx) { return { date: p.date, nav: (P.SPY[6 + idx] / spyBase) * 10000 }; });
+  const live = scoreAt(N - 1);
+  live.asOf = dates[N - 1];
+
+  function yearsBetween(d0, d1) { return (new Date(d1 + '-01') - new Date(d0 + '-01')) / (365.25 * 24 * 3600 * 1000); }
+  function cagr(series) {
+    const years = yearsBetween(series[0].date, series[series.length - 1].date);
+    return Math.pow(series[series.length - 1].nav / series[0].nav, 1 / years) - 1;
+  }
+  function volAnn(series) {
+    const rets = [];
+    for (let i = 1; i < series.length; i++) rets.push(series[i].nav / series[i - 1].nav - 1);
+    const mean = rets.reduce(function (a, b) { return a + b; }, 0) / rets.length;
+    const variance = rets.reduce(function (a, b) { return a + Math.pow(b - mean, 2); }, 0) / (rets.length - 1);
+    return Math.sqrt(variance) * Math.sqrt(12);
+  }
+  function maxDrawdown(series) {
+    let peak = -Infinity, worst = 0;
+    for (let i = 0; i < series.length; i++) {
+      if (series[i].nav > peak) peak = series[i].nav;
+      const dd = series[i].nav / peak - 1;
+      if (dd < worst) worst = dd;
+    }
+    return worst;
+  }
+
+  const years = yearsBetween(navSeries[0].date, navSeries[navSeries.length - 1].date);
+  const metrics = {
+    strategy: { cagr: cagr(navSeries) * 100, vol: volAnn(navSeries) * 100, mdd: maxDrawdown(navSeries) * 100, final: navSeries[navSeries.length - 1].nav, numChanges: trades.length, years: years },
+    spy: { cagr: cagr(spyBH) * 100, vol: volAnn(spyBH) * 100, mdd: maxDrawdown(spyBH) * 100, final: spyBH[spyBH.length - 1].nav }
+  };
+
+  return { dates: dates, P: P, navSeries: navSeries, spyBH: spyBH, trades: trades, holdCounts: holdCounts, live: live, metrics: metrics, MONTHLY: monthly };
+}
+
+// ============ FORMATTERS ============
+function fmtPct(x, digits) { digits = (digits == null) ? 1 : digits; return (x >= 0 ? '+' : '') + x.toFixed(digits) + '%'; }
+function fmtMoney(x) { return '$' + Math.round(x).toLocaleString('en-US'); }
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const MONTH_NAMES_FULL = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+function fmtMonth(ym) { const p = ym.split('-'); return MONTH_NAMES[parseInt(p[1], 10) - 1] + ' ' + p[0]; }
+
+function smoothPath(pts) {
+  if (pts.length === 0) return '';
+  if (pts.length === 1) return 'M' + pts[0].x + ',' + pts[0].y;
+  let d = 'M' + pts[0].x + ',' + pts[0].y + ' ';
+  for (let i = 1; i < pts.length; i++) {
+    const p0 = pts[i - 1], p1 = pts[i];
+    const midx = (p0.x + p1.x) / 2, midy = (p0.y + p1.y) / 2;
+    d += 'Q' + p0.x + ',' + p0.y + ' ' + midx + ',' + midy + ' ';
+  }
+  d += 'L' + pts[pts.length - 1].x + ',' + pts[pts.length - 1].y;
+  return d;
+}
+
+// ============ CHART RENDERING ============
+function computeChartPoints(seriesA, seriesB, w, h, padTop, padBottom, useLog) {
+  const allVals = seriesA.map(function (p) { return p.nav; }).concat(seriesB.map(function (p) { return p.nav; }));
+  const minV = Math.min.apply(null, allVals), maxV = Math.max.apply(null, allVals);
+  function scaleV(v) { return useLog ? Math.log(v) : v; }
+  const minS = scaleV(minV), maxS = scaleV(maxV);
+  const n = seriesA.length;
+  function xAt(i) { return (i / (n - 1)) * w; }
+  function yAt(v) { const s = scaleV(v); return h - padBottom - ((s - minS) / (maxS - minS)) * (h - padTop - padBottom); }
+  const ptsA = seriesA.map(function (p, i) { return { x: xAt(i), y: yAt(p.nav) }; });
+  const ptsB = seriesB.map(function (p, i) { return { x: xAt(i), y: yAt(p.nav) }; });
+  return { ptsA: ptsA, ptsB: ptsB, xAt: xAt, w: w, h: h };
+}
+function renderLineChart(svgEl, seriesA, seriesB, opts) {
+  const w = opts.w, h = opts.h, padTop = opts.padTop || 10, padBottom = opts.padBottom || 10;
+  const info = computeChartPoints(seriesA, seriesB, w, h, padTop, padBottom, opts.log !== false);
+  const pathA = smoothPath(info.ptsA), pathB = smoothPath(info.ptsB);
+  const areaA = pathA + ' L' + w + ',' + h + ' L0,' + h + ' Z';
+  const gradId = 'grad-' + Math.random().toString(36).slice(2, 8);
+  svgEl.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
+  svgEl.innerHTML =
+    '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1">' +
+    '<stop offset="0%" stop-color="var(--curve)" stop-opacity="0.28"/>' +
+    '<stop offset="100%" stop-color="var(--curve)" stop-opacity="0"/></linearGradient></defs>' +
+    '<path d="' + areaA + '" fill="url(#' + gradId + ')" stroke="none"/>' +
+    '<path d="' + pathB + '" fill="none" stroke="var(--charcoal-soft)" stroke-opacity="0.55" stroke-width="2" stroke-dasharray="6 6"/>' +
+    '<path d="' + pathA + '" fill="none" stroke="var(--curve)" stroke-width="2.75" stroke-linecap="round"/>';
+  return info;
+}
+
+function sparkPathFor(tk, ENGINE) {
+  const arr = ENGINE.MONTHLY[tk];
+  const last = arr.slice(-13);
+  const vals = last.map(function (d) { return d[1]; });
+  const minV = Math.min.apply(null, vals), maxV = Math.max.apply(null, vals);
+  const w = 160, h = 50, pad = 5;
+  const pts = last.map(function (d, i) {
+    const x = (i / (last.length - 1)) * w;
+    const y = h - pad - ((d[1] - minV) / ((maxV - minV) || 1)) * (h - 2 * pad);
+    return { x: x, y: y };
+  });
+  return '<path d="' + smoothPath(pts) + '" fill="none" stroke="var(--curve)" stroke-width="2" stroke-linecap="round"/>';
+}
+
+// ============ RENDER: PICKS CARD(S) ============
+function pickStartOf(tk, ENGINE) {
+  const arr = ENGINE.MONTHLY[tk];
+  let startYm = arr[0][0];
+  const trades = ENGINE.trades;
+  for (let i = trades.length - 1; i >= 0; i--) {
+    if (trades[i].ticker === tk) { startYm = trades[i].date; break; }
+  }
+  return startYm;
+}
+
+function equitySincePick(tk, ENGINE) {
+  const arr = ENGINE.MONTHLY[tk];
+  const startYm = pickStartOf(tk, ENGINE);
+  for (let i = 0; i < arr.length; i++) {
+    if (arr[i][0] === startYm) { return (arr[arr.length - 1][1] / arr[i][1] - 1) * 100; }
+  }
+  return 0;
+}
+
+function sparkPathDark(tk, ENGINE) {
+  const arr = ENGINE.MONTHLY[tk];
+  const startYm = pickStartOf(tk, ENGINE);
+  let startIdx = 0;
+  for (let i = 0; i < arr.length; i++) { if (arr[i][0] === startYm) { startIdx = i; break; } }
+  const slice = arr.slice(startIdx);
+  const base = slice[0][1] || 1;
+  const vals = slice.map(function (d) { return (d[1] / base) * 100; });
+  const minV = Math.min.apply(null, vals), maxV = Math.max.apply(null, vals);
+  const w = 200, h = 80, pad = 8;
+  const pts = vals.map(function (v, i) {
+    const x = (i / ((vals.length - 1) || 1)) * w;
+    const y = h - pad - ((v - minV) / ((maxV - minV) || 1)) * (h - 2 * pad);
+    return { x: x, y: y };
+  });
+  return '<path d="' + smoothPath(pts) + '" fill="none" stroke="var(--curve)" stroke-width="3" stroke-linecap="round"/>';
+}
+
+function renderCards(ENGINE) {
+  const holdings = [ENGINE.live.selected];
+  const grid = document.getElementById('cardsGrid');
+  let html = '';
+  holdings.forEach(function (tk) {
+    const meta = TICKER_META[tk];
+    const price = CURRENT_PRICES[tk];
+    const key = tk.toLowerCase();
+    const m1 = ENGINE.live[key + '1'] * 100, m3 = ENGINE.live[key + '3'] * 100, m6 = ENGINE.live[key + '6'] * 100;
+    const weight = Math.round(100 / holdings.length);
+    const pctLabel = weight + '%';
+    const perfLabel = m1 > 2 ? 'strong month' : (m1 > 0 ? 'small gain' : 'flat month');
+    const pickYm = pickStartOf(tk, ENGINE);
+    const nowYm = ENGINE.live.asOf;
+    html += '' +
+      '<div class="card-hover rounded-3xl overflow-hidden shadow-lg flex flex-col w-full h-full reveal" data-reveal style="background:var(--c-' + key + ');color:var(--charcoal)">' +
+      '<div class="p-8 md:p-10 flex-1">' +
+      '<div class="flex justify-between items-start mb-6 gap-4">' +
+      '<div>' +
+      '<h4 class="heading text-2xl md:text-3xl mb-1">' + tk + '</h4>' +
+      '<p class="text-sm md:text-base opacity-70">' + meta.name + '</p>' +
+      '</div>' +
+      '<div class="flex flex-col items-end gap-2">' +
+      '<div class="num heading text-2xl md:text-3xl font-extrabold">' + fmtMoney(price) + '</div>' +
+      '<span class="text-xs font-bold uppercase tracking-widest px-2.5 py-1 rounded-full bg-black/5">' + pctLabel + ' of portfolio</span>' +
+      '</div>' +
+      '</div>' +
+      '<div class="mb-6">' +
+      '<p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">Monthly return Â· ' + perfLabel + '</p>' +
+      '<p class="num font-bold text-6xl md:text-7xl leading-none" style="' + (m1 >= 0 ? 'color:var(--charcoal)' : 'color:' + 'var(--terracotta)') + '">' + fmtPct(m1) + '</p>' +
+      '</div>' +
+      '<div class="h-24 mb-1"><svg viewBox="0 0 200 80" preserveAspectRatio="none" class="w-full h-full">' + sparkPathDark(tk, ENGINE) + '</svg></div>' +
+      '<div class="flex items-center justify-between mono text-xs font-bold mb-4" style="color:var(--charcoal);opacity:.65">' +
+      '<span>' + fmtMonth(pickYm) + '</span><span>' + fmtMonth(nowYm) + '</span>' +
+      '</div>' +
+      '<p class="text-xs font-bold opacity-60 uppercase tracking-wider">Equity since it became the pick Â· ' + fmtPct(equitySincePick(tk, ENGINE)) + '</p>' +
+      '</div>' +
+      '<div class="grid grid-cols-3 bg-black/5 mt-auto">' +
+      '<div class="p-6 md:p-7">' +
+      '<p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">Target weight</p>' +
+      '<p class="num heading text-2xl md:text-3xl font-extrabold">' + pctLabel + '</p>' +
+      '</div>' +
+      '<div class="p-6 md:p-7 border-l border-black/10">' +
+      '<p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">3 Months</p>' +
+      '<p class="num heading text-2xl md:text-3xl font-extrabold">' + fmtPct(m3) + '</p>' +
+      '</div>' +
+      '<div class="p-6 md:p-7 border-l border-black/10">' +
+      '<p class="text-xs font-bold mb-2 uppercase tracking-wider opacity-70">6 Months</p>' +
+      '<p class="num heading text-2xl md:text-3xl font-extrabold">' + fmtPct(m6) + '</p>' +
+      '</div>' +
+      '</div>' +
+      '</div>';
+  });
+  grid.innerHTML = html;
+}
+
+// ============ RENDER: COMPARISON BARS ============
+function renderCompareBars(ENGINE) {
+  const rows = [
+    { tk: 'SPY', score: ENGINE.live.spyScore * 100 },
+    { tk: 'SCZ', score: ENGINE.live.sczScore * 100 },
+    { tk: 'TLT', score: (ENGINE.live.tlt1 + ENGINE.live.tlt3 + ENGINE.live.tlt6) * 100 }
+  ];
+  const maxAbs = Math.max.apply(null, rows.map(function (r) { return Math.abs(r.score); }));
+  const winner = ENGINE.live.selected;
+  const html = rows.map(function (r) {
+    const half = maxAbs > 0 ? (Math.abs(r.score) / maxAbs) * 50 : 0;
+    const left = r.score >= 0 ? 50 : 50 - half;
+    const isWinner = r.tk === winner;
+    return '' +
+      '<div>' +
+      '<div class="flex items-center gap-3">' +
+      '<div class="w-12 mono text-sm font-bold" style="color:var(--c-' + r.tk.toLowerCase() + '-text)">' + r.tk + '</div>' +
+      '<div class="flex-1 relative h-7 rounded-full overflow-hidden" style="background:var(--sage)">' +
+      '<div class="absolute top-0 bottom-0" style="left:50%;width:1px;background:var(--border)"></div>' +
+      '<div class="absolute inset-y-0 rounded-full" style="left:' + left + '%;width:' + half + '%;background:' + TICKER_META[r.tk].color + ';opacity:' + (isWinner ? 1 : 0.5) + '"></div>' +
+      '</div>' +
+      '<div class="w-20 text-right mono text-base font-bold" style="color:' + (r.score >= 0 ? 'var(--charcoal)' : 'var(--terracotta)') + '">' + fmtPct(r.score) + '</div>' +
+      '</div>' +
+      (isWinner ? '<div class="text-sm font-semibold mt-1" style="color:var(--c-' + r.tk.toLowerCase() + '-text);padding-left:60px">â†‘ this month\'s pick</div>' : '') +
+      '</div>';
+  }).join('');
+  document.getElementById('compareBars').innerHTML = html;
+}
+
+// ============ RENDER: SPLIT / WALLET ============
+function renderSplit(ENGINE) {
+  const holdings = [ENGINE.live.selected];
+  document.getElementById('splitExplainer').textContent = holdings.length === 1
+    ? 'Only one ETF qualifies this month, so the full amount goes there.'
+    : 'Multiple ETFs qualify this month â€” split evenly across all of them.';
+
+  function paint() {
+    const raw = document.getElementById('capitalInput').value.replace(/[^0-9.]/g, '');
+    const capital = parseFloat(raw) || 0;
+    const per = capital / holdings.length;
+    let barHtml = '<div class="flex w-full h-14 rounded-full overflow-hidden" style="background:var(--sage)">';
+    holdings.forEach(function (tk) {
+      const pct = 100 / holdings.length;
+      barHtml += '<div class="wallet-seg flex items-center justify-center text-lg font-bold" style="width:' + pct + '%;background:' + TICKER_META[tk].color + ';color:var(--charcoal);">' + tk + '</div>';
+    });
+    barHtml += '</div>';
+    document.getElementById('walletBar').innerHTML = barHtml;
+    document.getElementById('walletLegend').innerHTML = holdings.map(function (tk) {
+      const pct = Math.round(100 / holdings.length);
+      return '<div class="flex items-center gap-2 text-base md:text-lg"><span class="w-3 h-3 rounded-full" style="background:' + TICKER_META[tk].color + '"></span><span class="font-bold">' + tk + '</span><span style="color:var(--charcoal-soft)">' + pct + '% Â· ' + fmtMoney(per) + '</span></div>';
+    }).join('');
+  }
+  document.getElementById('capitalInput').addEventListener('input', function (e) {
+    const v = e.target.value.replace(/[^0-9]/g, '');
+    e.target.value = v ? Number(v).toLocaleString('en-US') : '';
+    paint();
+  });
+  paint();
+}
+
+// ============ RENDER: HERO ============
+function renderHero(ENGINE) {
+  const nav = ENGINE.navSeries, bh = ENGINE.spyBH;
+  const totalRet = (nav[nav.length - 1].nav / nav[0].nav - 1) * 100;
+  const spyRet = (bh[bh.length - 1].nav / bh[0].nav - 1) * 100;
+  document.getElementById('heroReturn').textContent = fmtPct(totalRet, 0);
+  document.getElementById('heroSpyReturn').textContent = fmtPct(spyRet, 0);
+  document.getElementById('heroDateStart').textContent = fmtMonth(nav[0].date);
+  document.getElementById('heroDateEnd').textContent = fmtMonth(nav[nav.length - 1].date);
+  document.getElementById('heroDataBadge').textContent = 'DATA THROUGH ' + fmtMonth(ENGINE.live.asOf).toUpperCase();
+  document.getElementById('heroYearsStat').textContent = Math.round(ENGINE.metrics.strategy.years);
+  renderLineChart(document.getElementById('heroChart'), nav, bh, { w: 640, h: 260, padTop: 16, padBottom: 16, log: true });
+}
+
+// ============ RENDER: BIG TRACK-RECORD CHART ============
+function renderBigChart(ENGINE) {
+  const nav = ENGINE.navSeries, bh = ENGINE.spyBH;
+  const svg = document.getElementById('bigChart');
+  const w = 1000, h = 400, padTop = 20, padBottom = 20;
+  const info = renderLineChart(svg, nav, bh, { w: w, h: h, padTop: padTop, padBottom: padBottom, log: true });
+  document.getElementById('trackRange').textContent = fmtMonth(nav[0].date) + ' â€“ ' + fmtMonth(nav[nav.length - 1].date);
+
+  const tooltip = document.getElementById('bigTooltip');
+  const wrap = svg.parentElement;
+  function onMove(evt) {
+    const rect = wrap.getBoundingClientRect();
+    const clientX = (evt.touches ? evt.touches[0].clientX : evt.clientX);
+    const relX = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
+    let i = Math.round(relX * (nav.length - 1));
+    i = Math.max(0, Math.min(nav.length - 1, i));
+    const px = (info.ptsA[i].x / w) * rect.width;
+    tooltip.style.left = Math.min(Math.max(px - 66, 0), rect.width - 150) + 'px';
+    tooltip.style.top = '6px';
+    tooltip.classList.remove('hidden');
+    tooltip.innerHTML = '<div class="font-bold mono">' + fmtMonth(nav[i].date) + '</div>' +
+      '<div style="color:var(--curve)">System: ' + fmtMoney(nav[i].nav) + '</div>' +
+      '<div style="color:var(--charcoal-soft)">SPY: ' + fmtMoney(bh[i].nav) + '</div>';
+  }
+  wrap.addEventListener('mousemove', onMove);
+  wrap.addEventListener('mouseleave', function () { tooltip.classList.add('hidden'); });
+  wrap.addEventListener('touchmove', onMove, { passive: true });
+}
+
+// ============ RENDER: STAT CARDS ============
+function renderStatCards(ENGINE) {
+  const s = ENGINE.metrics.strategy, b = ENGINE.metrics.spy;
+  const perChange = (s.years * 12 / s.numChanges).toFixed(1);
+  const cards = [
+    { label: 'Annualized return', val: fmtPct(s.cagr, 1), sub: 'SPY alone: ' + fmtPct(b.cagr, 1) },
+    { label: 'Worst drawdown', val: fmtPct(s.mdd, 1), sub: 'SPY alone: ' + fmtPct(b.mdd, 1) },
+    { label: 'Annualized volatility', val: s.vol.toFixed(1) + '%', sub: 'SPY alone: ' + b.vol.toFixed(1) + '%' },
+    { label: 'Position changes', val: s.numChanges, sub: 'about every ' + perChange + ' months' }
+  ];
+  document.getElementById('statCards').innerHTML = cards.map(function (c) {
+    return '<div class="card p-7 md:p-8 reveal" data-reveal>' +
+      '<div class="text-sm uppercase tracking-wide font-semibold" style="color:var(--charcoal-soft)">' + c.label + '</div>' +
+      '<div class="heading text-3xl md:text-4xl font-extrabold mt-2">' + c.val + '</div>' +
+      '<div class="text-sm mt-2" style="color:var(--charcoal-soft)">' + c.sub + '</div></div>';
+  }).join('');
+}
+
+// ============ RENDER: TIME IN ASSET ============
+function renderTimeInAsset(ENGINE) {
+  const counts = ENGINE.holdCounts;
+  const total = counts.SPY + counts.SCZ + counts.TLT;
+  const order = ['SPY', 'SCZ', 'TLT'];
+  let barHtml = '<div class="flex w-full h-10 rounded-full overflow-hidden" style="background:var(--sage)">';
+  order.forEach(function (tk) { barHtml += '<div style="width:' + (counts[tk] / total * 100) + '%;background:' + TICKER_META[tk].color + '"></div>'; });
+  barHtml += '</div>';
+  document.getElementById('timeInAssetBar').innerHTML = barHtml;
+  document.getElementById('timeInAssetLegend').innerHTML = order.map(function (tk) {
+    const pct = Math.round(counts[tk] / total * 100);
+    return '<div class="flex items-center gap-2 text-base md:text-lg"><span class="w-3 h-3 rounded-full" style="background:' + TICKER_META[tk].color + '"></span><span class="font-bold">' + tk + '</span><span style="color:var(--charcoal-soft)">' + pct + '% of months</span></div>';
+  }).join('');
+}
+
+// ============ RENDER: RECENT TRADES ============
+function renderRecentTrades(ENGINE) {
+  const recent = ENGINE.trades.slice(-7).reverse();
+  document.getElementById('recentTrades').innerHTML = recent.map(function (t) {
+    return '<div class="flex items-center justify-between text-base pb-4" style="border-bottom:1px solid var(--border-soft)">' +
+      '<span style="color:var(--charcoal-soft)">' + fmtMonth(t.date) + '</span>' +
+      '<span class="flex items-center gap-2 font-bold"><span class="w-2.5 h-2.5 rounded-full" style="background:' + TICKER_META[t.ticker].color + '"></span>' + t.ticker + '</span></div>';
+  }).join('');
+}
+
+// ============ HOW-IT-WORKS PREVIEWS ============
+function buildPreviews(ENGINE) {
+  const holdings = [ENGINE.live.selected];
+  const winner = holdings[0];
+  const previews = [];
+
+  previews.push(function () {
+    const price = CURRENT_PRICES[winner];
+    return '<div class="flex flex-col justify-center h-full">' +
+      '<div class="text-sm uppercase tracking-wide font-semibold mb-4" style="color:var(--charcoal-soft)">This month\'s pick â€” one card, top of page</div>' +
+      '<div class="card p-7" style="box-shadow:none;border:1.5px solid var(--border)">' +
+      '<div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full" style="background:' + TICKER_META[winner].color + '"></span><span class="mono text-3xl font-bold heading">' + winner + '</span></div>' +
+      '<div class="text-base mt-1" style="color:var(--charcoal-soft)">' + TICKER_META[winner].name + '</div>' +
+      '<div class="heading text-4xl md:text-5xl font-extrabold mt-4">' + fmtMoney(price) + '</div></div></div>';
+  });
+
+  previews.push(function () {
+    const n = holdings.length, r = 40, circumf = 2 * Math.PI * r, seg = circumf / n;
+    const circles = holdings.map(function (tk, i) {
+      return '<circle cx="60" cy="60" r="' + r + '" fill="none" stroke="' + TICKER_META[tk].color + '" stroke-width="16" stroke-dasharray="' + (seg - 3) + ' ' + (circumf - seg + 3) + '" stroke-dashoffset="' + (-i * seg) + '" transform="rotate(-90 60 60)"/>';
+    }).join('');
+    return '<div class="flex flex-col justify-center h-full">' +
+      '<div class="text-sm uppercase tracking-wide font-semibold mb-4" style="color:var(--charcoal-soft)">Where it all goes â€” one ETF</div>' +
+      '<div class="flex items-center gap-8"><svg viewBox="0 0 120 120" width="130" height="130">' + circles + '</svg>' +
+      '<div><div class="heading text-3xl md:text-4xl font-extrabold">' + n + ' ETF' + (n > 1 ? 's' : '') + '</div>' +
+      '<div class="text-base mt-2" style="color:var(--charcoal-soft)">100% of your money â€” nothing to split or figure out.</div></div></div></div>';
+  });
+
+  previews.push(function () {
+    const lastTrade = ENGINE.trades[ENGINE.trades.length - 1];
+    let startIdx = 0;
+    for (let i = 0; i < ENGINE.navSeries.length; i++) { if (ENGINE.navSeries[i].date === lastTrade.date) { startIdx = i; break; } }
+    const slice = ENGINE.navSeries.slice(startIdx);
+    const ret = (slice[slice.length - 1].nav / slice[0].nav - 1) * 100;
+    const vals = slice.map(function (p) { return p.nav; });
+    const minV = Math.min.apply(null, vals), maxV = Math.max.apply(null, vals);
+    const pts = slice.map(function (p, i) {
+      const x = (i / ((slice.length - 1) || 1)) * 260;
+      const y = 60 - ((p.nav - minV) / ((maxV - minV) || 1)) * 50 - 5;
+      return { x: x, y: y };
+    });
+    return '<div class="flex flex-col justify-center h-full">' +
+      '<div class="text-sm uppercase tracking-wide font-semibold mb-4" style="color:var(--charcoal-soft)">Real track record, real talk</div>' +
+      '<div class="heading text-5xl font-extrabold" style="color:' + (ret >= 0 ? 'var(--text-pos)' : 'var(--terracotta)') + '">' + fmtPct(ret) + '</div>' +
+      '<div class="text-base mt-2" style="color:var(--charcoal-soft)">Since ' + winner + ' became the pick (' + fmtMonth(lastTrade.date) + ')</div>' +
+      '<svg viewBox="0 0 260 65" class="mt-4" style="height:70px;width:100%" preserveAspectRatio="none"><path d="' + smoothPath(pts) + '" fill="none" stroke="var(--curve)" stroke-width="2.5" stroke-linecap="round"/></svg></div>';
+  });
+
+  previews.push(function () {
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const days = Math.ceil((next - now) / (24 * 3600 * 1000));
+    return '<div class="flex flex-col justify-center h-full">' +
+      '<div class="text-sm uppercase tracking-wide font-semibold mb-4" style="color:var(--charcoal-soft)">Get the next list</div>' +
+      '<div class="heading text-5xl font-extrabold">' + MONTH_NAMES_FULL[next.getMonth()] + ' 1</div>' +
+      '<div class="text-base mt-2" style="color:var(--charcoal-soft)">' + days + ' day' + (days === 1 ? '' : 's') + ' from now â€” opt in below and we\'ll email you that morning.</div></div>';
+  });
+
+  return previews;
+}
+
+// ============ STATIC UI ============
+function hashCode(str) { let h = 0; for (let i = 0; i < str.length; i++) { h = ((h << 5) - h) + str.charCodeAt(i); h |= 0; } return h; }
+
+function wireStaticUI(previews) {
+  document.getElementById('footYear').textContent = new Date().getFullYear();
+
+  const now = new Date();
+  const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  const days = Math.ceil((next - now) / (24 * 3600 * 1000));
+  const updateDate = document.getElementById('nextUpdateDate');
+  if (updateDate) updateDate.textContent = MONTH_NAMES[next.getMonth()] + ' 01';
+  const updateCount = document.getElementById('nextUpdateCountdown');
+  if (updateCount) updateCount.textContent = days === 1 ? 'tomorrow' : 'in ' + days + ' days';
+  document.title = 'InvestCompass | Next picks ' + MONTH_NAMES[next.getMonth()] + ' 01';
+
+  const navInner = document.getElementById('navInner');
+  window.addEventListener('scroll', function () {
+    if (window.scrollY > 10) { navInner.style.boxShadow = '0 18px 50px rgba(30,32,29,.13)'; }
+    else { navInner.style.boxShadow = '0 12px 40px rgba(30,32,29,.08)'; }
+  });
+
+  const menuBtn = document.getElementById('menuBtn'), menu = document.getElementById('mobileMenu');
+  const iconOpen = document.getElementById('menuIconOpen'), iconClose = document.getElementById('menuIconClose');
+  menuBtn.addEventListener('click', function () {
+    menu.classList.toggle('hidden'); menu.classList.toggle('flex');
+    iconOpen.classList.toggle('hidden'); iconClose.classList.toggle('hidden');
+  });
+  menu.querySelectorAll('a').forEach(function (a) {
+    a.addEventListener('click', function () {
+      menu.classList.add('hidden'); menu.classList.remove('flex');
+      iconOpen.classList.remove('hidden'); iconClose.classList.add('hidden');
+    });
+  });
+
+  const stepEls = document.querySelectorAll('.step-item');
+  const previewWrap = document.getElementById('previewWrap');
+  function showStep(idx) {
+    stepEls.forEach(function (el) { el.classList.toggle('active', el.dataset.step == idx); });
+    previewWrap.innerHTML = previews[idx]();
+  }
+  stepEls.forEach(function (el) { el.addEventListener('click', function () { showStep(el.dataset.step); }); });
+  showStep(0);
+
+  document.querySelectorAll('.card-hover').forEach(function (card) {
+    card.addEventListener('mousemove', function (e) {
+      const r = card.getBoundingClientRect();
+      card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
+      card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    });
+  });
+
+  document.querySelectorAll('.accordion-item').forEach(function (item) {
+    item.querySelector('.accordion-btn').addEventListener('click', function () {
+      const wasOpen = item.classList.contains('open');
+      document.querySelectorAll('.accordion-item').forEach(function (i) { i.classList.remove('open'); });
+      if (!wasOpen) item.classList.add('open');
+    });
+  });
+
+  const form = document.getElementById('subscribeForm');
+  const success = document.getElementById('subSuccess');
+  const errorEl = document.getElementById('subError');
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    const email = document.getElementById('subEmail').value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    if (!ok) { errorEl.classList.remove('hidden'); return; }
+    errorEl.classList.add('hidden');
+    try {
+      if (window.claude && window.claude.db && window.claude.db.doc) {
+        const id = 'sub_' + Math.abs(hashCode(email));
+        window.claude.db.doc('subscribers/' + id).set({ email: email, subscribedAt: Date.now() }).catch(function () {});
+      }
+    } catch (err) {}
+    form.classList.add('hidden');
+    success.classList.remove('hidden');
+  });
+
+  if (window.gsap) {
+    gsap.registerPlugin(ScrollTrigger);
+    document.querySelectorAll('[data-reveal]').forEach(function (el) {
+      gsap.to(el, { opacity: 1, y: 0, duration: 0.7, ease: 'power2.out', delay: parseFloat(el.dataset.revealDelay || 0), scrollTrigger: { trigger: el, start: 'top 90%' } });
+    });
+  } else {
+    document.querySelectorAll('[data-reveal]').forEach(function (el) { el.style.opacity = 1; el.style.transform = 'none'; });
+  }
+}
+
+// ============ INIT ============
+const ENGINE = computeEngine(MONTHLY);
+document.getElementById('picksTitle').textContent = (function () {
+  const n = 1; return n === 1 ? 'One ETF worth owning this month' : n + ' ETFs worth owning this month';
+})();
+document.getElementById('picksSubtitle').textContent = 'Scored on 1+3+6 month momentum. Data as of ' + fmtMonth(ENGINE.live.asOf) + '.';
+renderCards(ENGINE);
+renderCompareBars(ENGINE);
+renderSplit(ENGINE);
+renderHero(ENGINE);
+renderBigChart(ENGINE);
+renderStatCards(ENGINE);
+renderTimeInAsset(ENGINE);
+renderRecentTrades(ENGINE);
+const previews = buildPreviews(ENGINE);
+wireStaticUI(previews);
+
+})();
+</script>
+</body>
+</html>
