@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
- 
+
+<!-- ============ POROPERTY OF CODE__PEARL ============ -->
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>InvestCompass - This Month's ETF, Chosen by the Numbers</title>
@@ -10,8 +11,7 @@
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&family=Geist:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-   <!-- porperty of Code___PEARL -->
+<link href="https://fonts.googleapis.com/css2?family=Albert+Sans:wght@400;500;600;700;800&family=Geist:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --sage:#E8E6DE; --offwhite:#F9F8F4; --charcoal:#1E201D; --charcoal-soft:#6E7068;
@@ -31,7 +31,7 @@
     -webkit-font-smoothing:antialiased; overflow-x:hidden;
   }
   .heading{ font-family:'Albert Sans','Helvetica Neue',Arial,sans-serif; letter-spacing:-0.025em; }
-  .mono{ font-family:'Space Mono','Courier New',monospace; }
+  .mono{ font-variant-numeric: tabular-nums; }
   .gradient-text{
     background:linear-gradient(100deg, var(--charcoal) 30%, var(--terracotta) 90%);
     -webkit-background-clip:text; background-clip:text; color:transparent;
@@ -65,7 +65,7 @@
   .step-num{
     width:30px; height:30px; border-radius:999px; display:flex; align-items:center; justify-content:center;
     font-size:13px; font-weight:700; background:var(--sage); color:var(--charcoal-soft); flex-shrink:0;
-    font-family:'Space Mono',monospace; transition:all .25s ease;
+    transition:all .25s ease;
   }
   .step-item.active .step-num{ background:var(--terracotta); color:#fff; }
   .accordion-btn{ width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; text-align:left; padding:22px 4px; }
@@ -195,7 +195,7 @@
   /* ============ v1.10 big-scale design layer ============ */
   .heading{ font-weight:800; }
   h1,h2,h3,h4{ letter-spacing:-0.035em; }
-  .num{ font-variant-numeric: tabular-nums; }
+  .num, .mono{ font-variant-numeric: tabular-nums; }
   :root{
     --c-spy-soft:#FBEBC8;
     --c-scz-soft:#E2F3DB;
@@ -252,6 +252,10 @@
   #how .step-item.active .step-num{ background:var(--terracotta); color:#fff; }
   .step-item .method-body{ max-height:0; overflow:hidden; transition:max-height .5s ease; }
   .step-item.active .method-body{ max-height:220px; }
+  @media (max-width:1023px){
+    .step-item.active .method-body{ max-height:none; overflow:visible; }
+    .inline-preview{ margin-top:1.25rem; }
+  }
 
   /* preview panel (1.4) */
   #how .preview-panel{ background:var(--offwhite); border-radius:2rem; box-shadow:0 24px 70px rgba(30,32,29,.14); border:1px solid rgba(30,32,29,.05); }
@@ -267,10 +271,15 @@
   .accordion-panel p{ font-size:1.2rem; line-height:1.65; }
   .accordion-plus{ width:38px; height:38px; font-size:1.4rem; }
 
-  /* section headers — titles 48px, subtitle 30px */
+  /* section headers — titles 48px, one subtitle size everywhere, hero slightly larger */
   .section-title{ font-size:3rem; }
-  .section-sub{ font-size:1.875rem; }
-  @media (max-width:767px){ .section-title{ font-size:2.5rem; } .section-sub{ font-size:1.5rem; } }
+  .section-sub{ font-size:1.5rem; line-height:1.5; }
+  .hero-sub{ font-size:1.75rem; line-height:1.45; }
+  @media (max-width:767px){
+    .section-title{ font-size:2.5rem; }
+    .section-sub{ font-size:1.25rem; }
+    .hero-sub{ font-size:1.4rem; }
+  }
 
   /* hero */
   #hero{ border-radius:2rem; box-shadow:0 24px 80px rgba(30,32,29,.12); }
@@ -320,7 +329,7 @@
         <span class="gradient-text">One ETF<span class="etf-tip"><sup>*</sup><span class="etf-bubble">A basket of stocks you can buy like one.</span></span> to buy.<br>
         <span style="opacity:.4">Once a month. That's the system.</span></span>
       </h1>
-      <p class="mt-6 text-lg md:text-xl leading-relaxed max-w-lg" style="color:var(--charcoal-soft)">
+      <p  class="section-sub mt-6 opacity-90" style="color:var(--charcoal-soft)">
         Each month we compare a small set of <span class="etf-tip">ETFs<sup>*</sup><span class="etf-bubble">A basket of stocks you can buy like one.</span></span> on momentum and name the one worth holding. Buy it at any broker, hold it for the month, then check back. No charts, no news, no guessing.
       </p>
       <div class="mt-8 flex flex-wrap gap-4">
@@ -340,8 +349,8 @@
       <div class="mt-4">
         <div class="text-sm uppercase tracking-wide font-semibold" style="color:var(--charcoal-soft)">Growth of $10,000, this system's rule</div>
         <div class="flex items-baseline gap-3 mt-1 flex-wrap">
-          <div class="heading text-5xl font-extrabold" id="heroReturn"> - </div>
-          <div class="text-base" style="color:var(--charcoal-soft)">vs <span id="heroSpyReturn" class="font-semibold"> - </span> for SPY alone</div>
+<div class="num heading text-5xl font-extrabold" id="heroReturn"> - </div>
+        <div class="text-base" style="color:var(--charcoal-soft)">vs <span id="heroSpyReturn" class="num font-semibold"> - </span> for SPY alone</div>
         </div>
       </div>
       <div class="mt-3 relative" style="height:240px">
@@ -396,7 +405,7 @@
       <div class="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
           <h3 class="heading text-3xl">How to split your money</h3>
-          <p class="text-xl mt-2 opacity-60" id="splitExplainer">Loading...</p>
+          <p class="text-lg mt-4 leading-relaxed" style="color:var(--charcoal-soft)" id="splitExplainer">Loading...</p>
         </div>
         <div class="flex items-center gap-2">
           <span class="text-lg font-semibold" style="color:var(--charcoal-soft)">I have</span>
@@ -476,8 +485,8 @@
           </div>
         </div>
       </div>
-      <div class="preview-panel p-6 md:p-10 min-h-[520px] flex flex-col justify-center relative overflow-hidden reveal" data-reveal data-reveal-delay="0.1">
-        <div id="previewWrap" class="flex-1 flex flex-col justify-center"></div>
+      <div class="preview-panel p-6 md:p-10 min-h-[520px] lg:min-h-[680px] hidden lg:flex flex-col justify-center relative overflow-hidden reveal" data-reveal data-reveal-delay="0.1">
+        <div id="previewWrap" class="flex-1 flex flex-col justify-center pb-16"></div>
         <span class="live-badge"><span class="dot"></span>LIVE PREVIEW</span>
       </div>
     </div>
@@ -584,7 +593,6 @@
     </div>
   </div>
 </section>
-   <!-- porperty of Code___PEARL --> <!-- porperty of Code___PEARL -->
 
 <!-- ============ SUBSCRIBE ============ -->
 <section id="subscribe" class="px-6 py-24 md:py-40">
@@ -593,9 +601,9 @@
     <div class="relative z-10 p-8 md:p-20">
       <h2 class="heading text-3xl md:text-4xl font-extrabold mt-5" style="color:#fff">Next month, in your inbox.</h2>
       <p class="mt-4 max-w-xl mx-auto text-base md:text-lg" style="color:rgba(255,255,255,.85)">One email, on the 1st, whenever the rule updates. Nothing daily, nothing else.</p>
-      <form id="subscribeForm" class="mt-10 flex flex-col sm:flex-row gap-2 max-w-xl mx-auto p-2" style="background:rgba(255,255,255,.16); backdrop-filter:blur(14px); border-radius:999px; border:1px solid rgba(255,255,255,.25);">
-        <input id="subEmail" type="email" required placeholder="you@email.com" class="flex-1 text-base md:text-lg" style="padding-top:14px;padding-bottom:14px; background:transparent; border:none; outline:none; border-radius:999px; padding-left:24px; padding-right:24px; color:#fff;">
-        <button type="submit" class="shrink-0 justify-center font-extrabold text-base md:text-lg" style="background:var(--offwhite); color:var(--charcoal); padding:14px 36px; border-radius:999px;">Join</button>
+      <form id="subscribeForm" class="mt-10 flex flex-col sm:flex-row gap-3 sm:gap-2 max-w-xl mx-auto p-2.5 sm:p-2" style="background:rgba(255,255,255,.16); backdrop-filter:blur(14px); border-radius:1.5rem; border:1px solid rgba(255,255,255,.25);">
+        <input id="subEmail" type="email" required placeholder="you@email.com" class="flex-1 text-base md:text-lg rounded-full" style="padding:14px 22px; background:rgba(255,255,255,.18); border:none; outline:none; color:#fff;">
+        <button type="submit" class="shrink-0 justify-center font-extrabold text-base md:text-lg rounded-full" style="background:var(--offwhite); color:var(--charcoal); padding:14px 34px;">Join</button>
       </form>
       <div id="subSuccess" class="hidden mt-8 flex items-center justify-center gap-2 font-semibold text-base md:text-lg" style="color:#fff">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg>
@@ -894,7 +902,7 @@ function renderCompareBars(ENGINE) {
       '<div class="absolute top-0 bottom-0" style="left:50%;width:1px;background:var(--border)"></div>' +
       '<div class="absolute inset-y-0 rounded-full" style="left:' + left + '%;width:' + half + '%;background:' + TICKER_META[r.tk].color + ';opacity:' + (isWinner ? 1 : 0.5) + '"></div>' +
       '</div>' +
-      '<div class="w-20 text-right mono text-base font-bold" style="color:' + (r.score >= 0 ? 'var(--charcoal)' : 'var(--terracotta)') + '">' + fmtPct(r.score) + '</div>' +
+      '<div class="w-20 text-right num text-base font-bold" style="color:' + (r.score >= 0 ? 'var(--charcoal)' : 'var(--terracotta)') + '">' + fmtPct(r.score) + '</div>' +
       '</div>' +
       (isWinner ? '<div class="text-sm font-semibold mt-1" style="color:var(--c-' + r.tk.toLowerCase() + '-text);padding-left:60px">→ this month\'s pick</div>' : '') +
       '</div>';
@@ -907,31 +915,34 @@ function renderSplit(ENGINE) {
   const holdings = [ENGINE.live.selected];
   const allTickers = ['SPY', 'SCZ', 'TLT'];
   document.getElementById('splitExplainer').textContent = holdings.length === 1
-    ? 'Only one ETF qualifies this month, so the full amount goes there.'
-    : 'Multiple ETFs qualify this month - split evenly across all of them.';
+    ? 'This month, 100% of what you invest goes to buy this one ETF.'
+    : 'This month, your money is split evenly across these ETFs.';
 
   function paint() {
     const raw = document.getElementById('capitalInput').value.replace(/[^0-9.]/g, '');
     const capital = parseFloat(raw) || 0;
     const per = capital / holdings.length;
     const pct = Math.round(100 / holdings.length * 100) / 100;
-    const r = 70, stroke = 30, cx = 100, cy = 100;
+    const cx = 110, cy = 110, r = 74, stroke = 34;
     const circ = 2 * Math.PI * r;
     const seg = circ / allTickers.length;
+    const gap = 6;
     const winner = holdings[0];
-    let segs = '';
+    let arcs = '', labels = '';
     allTickers.forEach(function (tk, i) {
       const lit = tk === winner;
-      const color = lit ? TICKER_META[tk].color : 'rgba(30,32,29,.10)';
-      const offset = i * seg - circ / 4;
-      segs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + stroke + '" stroke-dasharray="' + seg + ' ' + circ + '" stroke-dashoffset="' + (-offset) + '" stroke-linecap="butt"' + (lit ? ' style="filter:drop-shadow(0 4px 10px ' + color + '55)"' : '') + '></circle>';
+      const color = lit ? TICKER_META[tk].color : 'rgba(30,32,29,.12)';
+      arcs += '<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="' + stroke + '" stroke-dasharray="' + (seg - gap) + ' ' + (circ - seg + gap) + '" stroke-dashoffset="' + (-i * seg) + '" transform="rotate(-90 ' + cx + ' ' + cy + ')"' + (lit ? ' style="filter:drop-shadow(0 4px 12px ' + color + '66)"' : '') + '></circle>';
+      const mid = (-90 + i * (360 / allTickers.length) + (180 / allTickers.length)) * Math.PI / 180;
+      const lx = cx + Math.cos(mid) * r, ly = cy + Math.sin(mid) * r;
+      labels += '<text x="' + lx + '" y="' + ly + '" text-anchor="middle" dominant-baseline="middle" font-size="15" font-weight="700" fill="' + (lit ? '#1E201D' : 'rgba(30,32,29,.35)') + '">' + tk + '</text>';
     });
-    const html = '<div class="flex flex-col md:flex-row items-center gap-10">' +
-      '<div class="relative" style="width:200px;height:200px;flex-shrink:0">' +
-      '<svg viewBox="0 0 200 200" class="w-full h-full" style="transform:rotate(0deg)">' + segs + '</svg>' +
+    const html = '<div class="flex flex-col md:flex-row items-center justify-center gap-10">' +
+      '<div class="relative" style="width:220px;height:220px;flex-shrink:0">' +
+      '<svg viewBox="0 0 220 220" class="w-full h-full">' + arcs + labels + '</svg>' +
       '<div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">' +
-      '<div class="heading font-extrabold text-3xl" style="color:' + TICKER_META[winner].color + '">' + winner + '</div>' +
-      '<div class="mono text-sm mt-0.5">' + pct + '%</div>' +
+      '<div class="heading font-extrabold text-3xl">' + pct + '%</div>' +
+      '<div class="text-xs font-bold uppercase tracking-widest mt-0.5" style="color:var(--charcoal-soft)">to ' + winner + '</div>' +
       '</div></div>' +
       '<div class="flex flex-col gap-3 w-full max-w-xs">' +
       allTickers.map(function (tk) {
@@ -940,7 +951,7 @@ function renderSplit(ENGINE) {
           '<div class="flex items-center gap-2.5">' +
           '<span class="w-3.5 h-3.5 rounded-full" style="background:' + (lit ? TICKER_META[tk].color : 'rgba(30,32,29,.15)') + '"></span>' +
           '<span class="font-bold">' + tk + '</span></div>' +
-          '<span class="mono text-sm" style="color:var(--charcoal-soft)">' + (lit ? pct + '% · ' + fmtMoney(per) : '0%') + '</span>' +
+          '<span class="num text-sm" style="color:var(--charcoal-soft)">' + (lit ? pct + '% · ' + fmtMoney(per) : '0%') + '</span>' +
           '</div>';
       }).join('') + '</div></div>';
     document.getElementById('walletBar').innerHTML = html;
@@ -1010,8 +1021,8 @@ function renderStatCards(ENGINE) {
   document.getElementById('statCards').innerHTML = cards.map(function (c) {
     return '<div class="card p-7 md:p-8 reveal" data-reveal>' +
       '<div class="text-sm uppercase tracking-wide font-semibold" style="color:var(--charcoal-soft)">' + c.label + '</div>' +
-      '<div class="heading text-3xl md:text-4xl font-extrabold mt-2">' + c.val + '</div>' +
-      '<div class="text-sm mt-2" style="color:var(--charcoal-soft)">' + c.sub + '</div></div>';
+      '<div class="num heading text-3xl md:text-4xl font-extrabold mt-2">' + c.val + '</div>' +
+      '<div class="text-sm mt-2 num" style="color:var(--charcoal-soft)">' + c.sub + '</div></div>';
   }).join('');
 }
 
@@ -1026,7 +1037,7 @@ function renderTimeInAsset(ENGINE) {
   document.getElementById('timeInAssetBar').innerHTML = barHtml;
   document.getElementById('timeInAssetLegend').innerHTML = order.map(function (tk) {
     const pct = Math.round(counts[tk] / total * 100);
-    return '<div class="flex items-center gap-2 text-base md:text-lg"><span class="w-3 h-3 rounded-full" style="background:' + TICKER_META[tk].color + '"></span><span class="font-bold">' + tk + '</span><span style="color:var(--charcoal-soft)">' + pct + '% of months</span></div>';
+    return '<div class="flex items-center gap-2 text-base md:text-lg"><span class="w-3 h-3 rounded-full" style="background:' + TICKER_META[tk].color + '"></span><span class="font-bold">' + tk + '</span><span class="num" style="color:var(--charcoal-soft)">' + pct + '% of months</span></div>';
   }).join('');
 }
 
@@ -1053,7 +1064,7 @@ function buildPreviews(ENGINE) {
       '<div class="card p-7" style="box-shadow:none;border:1.5px solid var(--border)">' +
       '<div class="flex items-center gap-2.5"><span class="w-3.5 h-3.5 rounded-full" style="background:' + TICKER_META[winner].color + '"></span><span class="mono text-3xl font-bold heading">' + winner + '</span></div>' +
       '<div class="text-base mt-1" style="color:var(--charcoal-soft)">' + TICKER_META[winner].name + '</div>' +
-      '<div class="heading text-4xl md:text-5xl font-extrabold mt-4">' + fmtMoney(price) + '</div></div></div>';
+      '<div class="num heading text-4xl md:text-5xl font-extrabold mt-4">' + fmtMoney(price) + '</div></div></div>';
   });
 
   previews.push(function () {
@@ -1064,7 +1075,7 @@ function buildPreviews(ENGINE) {
     return '<div class="flex flex-col justify-center h-full">' +
       '<div class="text-sm uppercase tracking-wide font-semibold mb-4" style="color:var(--charcoal-soft)">Where it all goes - one ETF</div>' +
       '<div class="flex items-center gap-8"><svg viewBox="0 0 120 120" width="130" height="130">' + circles + '</svg>' +
-      '<div><div class="heading text-3xl md:text-4xl font-extrabold">' + n + ' ETF' + (n > 1 ? 's' : '') + '</div>' +
+      '<div><div class="num heading text-3xl md:text-4xl font-extrabold">' + n + ' ETF' + (n > 1 ? 's' : '') + '</div>' +
       '<div class="text-base mt-2" style="color:var(--charcoal-soft)">100% of your money - nothing to split or figure out.</div></div></div></div>';
   });
 
@@ -1083,7 +1094,7 @@ function buildPreviews(ENGINE) {
     });
     return '<div class="flex flex-col justify-center h-full">' +
       '<div class="text-sm uppercase tracking-wide font-semibold mb-4" style="color:var(--charcoal-soft)">Real track record, real talk</div>' +
-      '<div class="heading text-5xl font-extrabold" style="color:' + (ret >= 0 ? 'var(--text-pos)' : 'var(--terracotta)') + '">' + fmtPct(ret) + '</div>' +
+      '<div class="num heading text-5xl font-extrabold" style="color:' + (ret >= 0 ? 'var(--text-pos)' : 'var(--terracotta)') + '">' + fmtPct(ret) + '</div>' +
       '<div class="text-base mt-2" style="color:var(--charcoal-soft)">Since ' + winner + ' became the pick (' + fmtMonth(lastTrade.date) + ')</div>' +
       '<svg viewBox="0 0 260 65" class="mt-4" style="height:70px;width:100%" preserveAspectRatio="none"><path d="' + smoothPath(pts) + '" fill="none" stroke="var(--curve)" stroke-width="2.5" stroke-linecap="round"/></svg></div>';
   });
@@ -1096,15 +1107,15 @@ function buildPreviews(ENGINE) {
     const cells = [];
     for (let i = 0; i < lead; i++) cells.push('<div class="aspect-square flex items-center justify-center"></div>');
     for (let d = 1; d <= daysIn; d++) {
-      cells.push('<div class="aspect-square flex items-center justify-center text-sm' + (d === 1 ? ' rounded-lg bg-[#1E201D] text-white font-bold' : ' text-center opacity-70') + '">' + d + '</div>');
+      cells.push('<div class="num aspect-square flex items-center justify-center text-sm' + (d === 1 ? ' rounded-lg bg-[#1E201D] text-white font-bold' : ' text-center opacity-70') + '">' + d + '</div>');
     }
     const days = Math.ceil((next - now) / (24 * 3600 * 1000));
     return '<div class="flex flex-col justify-center items-center">' +
       '<div class="bg-white rounded-2xl p-8 w-full max-w-xs shadow-xl">' +
       '<div class="text-center mb-6">' +
       '<p class="text-sm uppercase tracking-wide font-semibold mb-2" style="color:var(--terracotta)">NEXT UPDATE</p>' +
-      '<p class="heading text-3xl font-black">' + MONTH_NAMES_FULL[next.getMonth()] + ' 1</p>' +
-      '<p class="text-base mt-1" style="color:var(--charcoal-soft)">' + days + ' day' + (days === 1 ? '' : 's') + ' from now</p>' +
+      '<p class="num heading text-3xl font-black">' + MONTH_NAMES_FULL[next.getMonth()] + ' 1</p>' +
+      '<p class="num text-base mt-1" style="color:var(--charcoal-soft)">' + days + ' day' + (days === 1 ? '' : 's') + ' from now</p>' +
       '</div>' +
       '<div class="grid grid-cols-7 gap-1">' +
       ['S','M','T','W','T','F','S'].map(function (d) { return '<div class="text-xs font-bold text-center opacity-50">' + d + '</div>'; }).join('') +
@@ -1157,8 +1168,15 @@ function wireStaticUI(previews) {
     const node = document.createElement('div');
     node.innerHTML = previews[idx]();
     const fresh = node.firstElementChild;
-    previewWrap.innerHTML = '';
-    previewWrap.appendChild(fresh);
+    const isMobile = window.matchMedia('(max-width: 1023px)').matches;
+    document.querySelectorAll('.step-item .inline-preview').forEach(function (n) { n.remove(); });
+    if (isMobile) {
+      fresh.classList.add('inline-preview');
+      stepEls[idx].querySelector('.method-body').appendChild(fresh);
+    } else {
+      previewWrap.innerHTML = '';
+      previewWrap.appendChild(fresh);
+    }
     if (window.gsap) {
       gsap.fromTo(fresh, { opacity: 0, y: 14 }, { opacity: 1, y: 0, duration: 0.45, ease: 'power2.out' });
     } else {
@@ -1229,7 +1247,7 @@ renderTimeInAsset(ENGINE);
 renderRecentTrades(ENGINE);
 const previews = buildPreviews(ENGINE);
 wireStaticUI(previews);
-// <!-- porperty of Code___PEARL -->
+
 // ETF '*': tap to toggle the explanation bubble (works on touch, hover covered by CSS)
 document.querySelectorAll('.etf-tip').forEach(function (tip) {
   tip.addEventListener('click', function (ev) {
